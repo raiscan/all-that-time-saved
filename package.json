@@ -1,0 +1,12 @@
+{
+  "name": "claude-animation-base",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Clawd, painted in p5.brush: a character kit and guide for making hand-painted Clawd animations",
+  "dependencies": {
+    "p5": "^2.3.3",
+    "p5.brush": "^2.2.3",
+    "puppeteer-core": "^25.11.0"
+  }
+}

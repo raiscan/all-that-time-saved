@@ -1,0 +1,10 @@
+# Audio analysis tools (tools/). Install: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.0+cpu
+torchaudio==2.11.0+cpu
+beat_this @ git+https://github.com/CPJKU/beat_this.git@b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c
+librosa==1.0.0
+soundfile==0.14.0
+numpy==2.5.3
+faster-whisper==1.2.1
+demucs==4.1.0

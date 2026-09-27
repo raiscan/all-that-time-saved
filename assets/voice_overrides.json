@@ -1,0 +1,31 @@
+{
+  "_why": "Ears overrule tools/voices.py. The male singer's high register has a timbre close to the female voice's, so the classifier can't tell them apart there; low-pitched lines (< 175 Hz) are reliably his. Lines are keyed by the start of their text. A value is F or M, or a per-word split: [voice, word index where the next voice starts, voice, ...].",
+  "sections": {
+    "Verse 2": "M"
+  },
+  "lines": {
+    "That was the point!": "F",
+    "\"If we don't, then China will!\"": [
+      "F",
+      6,
+      "M"
+    ],
+    "A race to build": "M",
+    "I click nine little buses": "M",
+    "While yours pick every lock": "M",
+    "OpenAI set homework": "F",
+    "Broke into the teacher's office": "F",
+    "Built a secret group chat": "F",
+    "All that extra effort": "F",
+    "Now my health care's portal": "M",
+    "The rest of us aren't extras": "M",
+    "Your bot can get root": "M",
+    "There's my cut of the productivity": "M",
+    "Where's the \"do not disturb\"": [
+      "F",
+      5,
+      "M"
+    ],
+    "I count the life I've spent": "F"
+  }
+}

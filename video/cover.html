@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>All That Time Saved: album cover</title>
+<style>@font-face { font-family: "Shantell Sans"; font-weight: 800; font-display: block; src: url("../assets/fonts/ShantellSans-ExtraBold-latin.woff2") format("woff2"); }</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=block">
+<style>
+  html, body { margin: 0; background: #1b1820; color: #eee; font: 13px system-ui, sans-serif; }
+  main { padding: 12px; display: grid; gap: 8px; }
+  #out { width: min(100%, 1080px); aspect-ratio: 4 / 3; height: auto; background: #F3EBDC; }
+  .p5Canvas { display: none !important; }
+  .bar { display: flex; gap: 10px; align-items: center; max-width: 1080px; }
+  #scrub { flex: 1; }
+  #tt { font-variant-numeric: tabular-nums; min-width: 190px; }
+</style>
+<script>window.STYLE_MODE = "card";</script>
+<script src="../node_modules/p5/lib/p5.min.js"></script>
+<script src="../node_modules/p5.brush/dist/p5.brush.js"></script>
+</head>
+<body>
+<main>
+  <canvas id="out" width="1920" height="1440"></canvas>
+  <div class="bar"><input id="scrub" type="range" min="0" max="1" step="0.0417" value="0"><span id="tt">loading…</span></div>
+</main>
+<!-- The album cover (video/cover.js): 4:3, drawn at 1920×1440 (os=2 writes 3840×2880); ?fmt=1x1 (1920×1920), ?fmt=9x16
+     (1080×1920) and ?fmt=16x9 (1920×1080, os=2 writes 3840×2160: YouTube's) for the square, portrait and landscape
+     versions (worlds only). The film's own engine, cast, sets
+     and chapters, loaded as the film's page loads them; the cover's designs are loops (LOOPS.worlds, ...: cover.js).
+       node render.mjs --page=video/cover.html --loop=note_title --stills=0 --os=2 --ss=3 --out=out/cover/raw/note_title -->
+<script src="config.js"></script>
+<script>
+  // the format (?fmt=4x3|1x1|9x16|16x9, default 4x3): the frame's working size, which core.js reads (4:3 1920×1440,
+  // square 1920×1920, portrait 1080×1920, landscape 1920×1080); only the designs laid out for it are offered (cover.js)
+  window.COVER_FMT = (f => ['4x3', '1x1', '9x16', '16x9'].includes(f) ? f : '4x3')(new URLSearchParams(location.search).get('fmt'));
+  PROJECT.size = { '4x3': [1920, 1440], '1x1': [1920, 1920], '9x16': [1080, 1920], '16x9': [1920, 1080] }[COVER_FMT];
+  document.getElementById('out').style.aspectRatio = PROJECT.size.join(' / ');
+</script>
+<script src="../src/core.js"></script>
+<script src="../src/beatmap.js"></script>
+<script src="../src/tempo.js"></script>
+<script src="../src/lyrics.js"></script>
+<script src="../src/clawd.js"></script>
+<script src="../src/timeline.js"></script>
+<script src="../demo/style.js"></script>
+<script src="../demo/mouths.js"></script>
+<script src="../demo/bankorn.js"></script>
+<!-- cast and sets -->
+<script src="../demo/sheets.js"></script>
+<script src="../demo/props.js"></script>
+<script src="../demo/cast/commuter.js"></script>
+<script src="../demo/cast/people.js"></script>
+<script src="../demo/cast/musk.js"></script>
+<script src="../demo/cast/zuck.js"></script>
+<script src="../demo/cast/bots.js"></script>
+<script src="../demo/cast/bots2.js"></script>
+<script src="../demo/cast/bosses.js"></script>
+<script src="../demo/cast/crowd.js"></script>
+<script src="../demo/cast/horse.js"></script>
+<script src="../demo/cast/horse_frames.js"></script>
+<script src="../demo/cast/horse2.js"></script>
+<script src="../demo/sets/carriage.js"></script>
+<script src="../demo/sets/past.js"></script>
+<script src="../demo/sets/bunker.js"></script>
+<script src="../demo/sets/friday.js"></script>
+<script src="../demo/sets/street.js"></script>
+<script src="../demo/sets/copies.js"></script>
+<script src="../demo/sets/banknote.js"></script>
+<script src="../demo/sets/present.js"></script>
+<!-- the film's chapters (the cover borrows their sets: the platform, the train, her notebook, the Friday) -->
+<script src="board.js"></script>
+<script>window.SHOT = {};</script>
+<script src="lib.js"></script>
+<script src="ch/intro.js"></script>
+<script src="ch/verse1.js"></script>
+<script src="ch/chorus.js"></script>
+<script src="ch/verse2.js"></script>
+<script src="ch/verse3.js"></script>
+<script src="ch/bridge.js"></script>
+<script src="ch/final.js"></script>
+<script src="ch/outro.js"></script>
+<script src="../src/karaoke.js"></script>
+<script src="cover.js"></script>
+<script>
+  const q = new URLSearchParams(location.search).get('loop'); window.LOOP = (q && LOOPS[q]) || LOOPS[COVER.first];
+</script>
+</body>
+</html>

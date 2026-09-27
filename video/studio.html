@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>All That Time Saved: animatic</title>
+<style>@font-face { font-family: "Shantell Sans"; font-weight: 800; font-display: block; src: url("../assets/fonts/ShantellSans-ExtraBold-latin.woff2") format("woff2"); }</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=block">
+<style>
+  html, body { margin: 0; background: #1b1820; color: #eee; font: 13px system-ui, sans-serif; }
+  main { padding: 12px; display: grid; gap: 8px; }
+  #out { width: min(100%, 1280px); aspect-ratio: 16 / 9; height: auto; background: #F3EBDC; }
+  .p5Canvas { display: none !important; }
+  .bar { display: flex; gap: 10px; align-items: center; max-width: 1280px; }
+  #scrub { flex: 1; }
+  #tt { font-variant-numeric: tabular-nums; min-width: 190px; }
+</style>
+<script>window.STYLE_MODE = "card";</script>
+<script src="../node_modules/p5/lib/p5.min.js"></script>
+<script src="../node_modules/p5.brush/dist/p5.brush.js"></script>
+</head>
+<body>
+<main>
+  <canvas id="out" width="1920" height="1080"></canvas>
+  <div class="bar"><input id="scrub" type="range" min="0" max="11" step="0.0417" value="0"><span id="tt">loading…</span></div>
+</main>
+<!-- engine (the kit), then the demo's style layer -->
+<script src="config.js"></script>
+<script src="../src/core.js"></script>
+<script src="../src/beatmap.js"></script>
+<script src="../src/tempo.js"></script>
+<script src="../src/lyrics.js"></script>
+<script src="../src/polka_lyrics.js"></script>
+<script src="../src/credits_usage.js"></script>
+<script src="../src/clawd.js"></script>
+<script src="../src/timeline.js"></script>
+<script src="../demo/style.js"></script>
+<script src="../demo/mouths.js"></script>
+<script src="../demo/bankorn.js"></script>
+<!-- cast and sets -->
+<script src="../demo/sheets.js"></script>
+<script src="../demo/props.js"></script>
+<script src="../demo/cast/commuter.js"></script>
+<script src="../demo/cast/people.js"></script>
+<script src="../demo/cast/musk.js"></script>
+<script src="../demo/cast/zuck.js"></script>
+<script src="../demo/cast/bots.js"></script>
+<script src="../demo/cast/bots2.js"></script>
+<script src="../demo/cast/bosses.js"></script>
+<script src="../demo/cast/crowd.js"></script>
+<script src="../demo/cast/horse.js"></script>
+<script src="../demo/cast/horse_frames.js"></script>
+<script src="../demo/cast/horse2.js"></script>
+<script src="../demo/sets/carriage.js"></script>
+<script src="../demo/sets/past.js"></script>
+<script src="../demo/sets/bunker.js"></script>
+<script src="../demo/sets/friday.js"></script>
+<script src="../demo/sets/street.js"></script>
+<script src="../demo/sets/copies.js"></script>
+<script src="../demo/sets/banknote.js"></script>
+<script src="../demo/sets/present.js"></script>
+<!-- model sheets, then the demo itself -->
+<script src="board.js"></script>
+<script>window.SHOT = {};</script>
+<script src="lib.js"></script>
+<!-- chapters: finished shots (video/ch/) go here -->
+<script src="ch/intro.js"></script>
+<script src="ch/verse1.js"></script>
+<script src="ch/chorus.js"></script>
+<script src="ch/verse2.js"></script>
+<script src="ch/verse3.js"></script>
+<script src="ch/bridge.js"></script>
+<script src="ch/final.js"></script>
+<script src="ch/outro.js"></script>
+<script src="ch/credits.js"></script>
+<script src="animatic.js"></script>
+<script src="../src/karaoke.js"></script>
+<script>
+  const q = new URLSearchParams(location.search).get('loop'); if (q && LOOPS[q]) window.LOOP = LOOPS[q];
+</script>
+</body>
+</html>
