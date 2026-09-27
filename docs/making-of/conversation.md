@@ -10790,3 +10790,38 @@ Answers come in a few different phrasings, and questions with quotes inside them
 
 The export now catches every answer and has no personal details. Committing it:
 
+Nothing personal remains in the tool or the export. Committing and rebuilding the public copy:
+
+Everything in the history folder is our own renders. Two of the Muse sheets might have been composited next to Meta's own reference art, though, so I'll look at them:
+
+Both are our own model sheets. Creating the public repo:
+
+Now the same change in the public repo, as a commit on top under the UncleHerbert identity:
+
+GitHub now shows the licence as MIT. A quick check on the 4K:
+
+The project is public: **https://github.com/raiscan/all-that-time-saved**, the link for your YouTube description.
+
+**The public repo:**
+- **Contents:** all the code, the audio (as you chose), the design history, the conversation export, and the LICENSE, NOTICE and README.
+- **One clean commit:** it's authored as "UncleHerbert" with your GitHub no-reply address. Your personal email, which is on 583 commits in the private history, isn't anywhere in it.
+- **Mascot reference art left out:** the Meta Jolly and Charm images and the Codex pets sheets aren't in it. The design-history images that are included are all our own renders; I checked the two Muse sheets specifically.
+- **Checked for personal details:** the build stops if it finds your name, your login or a Gmail address. It caught one on the first try: the conversation-export tool's own scrub list named you. I rewrote it with generic rules.
+- **Licence:**
+  - `LICENSE` is plain MIT with two copyright lines, John Heibel's for the framework and yours for this project, so GitHub shows "MIT".
+  - `NOTICE` says what MIT doesn't cover: the song, lyrics, film and artwork (all rights reserved), the OFL-licensed fonts, and the trademarks, with the not-affiliated line.
+  - The README opens with what the project is, the credits and the licence in brief.
+- **Your private repo** keeps its full history, and stays the working copy.
+
+**The conversation:**
+- **Where it is:** `docs/making-of/conversation.md`, 0.7 MB covering 24 to 27 September.
+- **What's in it:** your 378 messages, including the answers you picked from the option menus, and my replies, as you saw them.
+- **What's left out:** the tool calls and render output (git has every change), the helper agents' own transcripts, my hidden reasoning, and system text.
+- **How to update it:** `tools/export_conversation.py` regenerates it, and I'll refresh it once more at the end. Give it a skim, since it's public now.
+
+**T3 Code credit:** "Agent control, orchestrated in · T3 Code · by Theo Browne and Julius Marminge", with the link and "the agent harness control surface Claude Code and its helper agents ran in". It's in the 4K and in the final 1080p that will be made from it.
+
+**Renders:** the 4K is about 25 minutes from finishing its frames. Then come the 4K master, the YouTube upload file and the sharper 1080p. I'll link them all when they land.
+
+Everything rendered cleanly. Checking the upload file itself: that the T3 Code credit is in, and that its colours match the 4K master when decoded:
+
