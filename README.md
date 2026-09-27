@@ -6,7 +6,7 @@ notebook doodle. Animation, design and code by Claude (Opus 5.5) in Claude Code,
 orchestrated in [T3 Code](https://github.com/pingdotgg/t3code). Built on
 [Claude Animation Base](https://github.com/JohnHeibel/ClaudeAnimationBase) by John Heibel.
 
-**Licence.** The code is MIT ([LICENSE](LICENSE)). The song, lyrics, film and artwork are not: (c) 2026 UncleHerbert,
+**Licence.** The code is MIT ([LICENSE](LICENSE)); what that doesn't cover is in [NOTICE](NOTICE). The song, lyrics, film and artwork are not: (c) 2026 UncleHerbert,
 all rights reserved. The fonts are under the SIL Open Font License. Claude, Copilot, Gemini, Grok, Muse and Codex, and
 their mascots, are trademarks of their owners; this is an independent work of parody and commentary, not affiliated
 with, sponsored or endorsed by any of them.
