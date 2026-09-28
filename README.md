@@ -1,3 +1,5 @@
+![All That Time Saved: five worlds, one title across them, by UncleHerbert](docs/banner.jpg)
+
 # All That Time Saved
 
 A music video for UncleHerbert's song "All That Time Saved": six minutes of animation drawn entirely in code (p5.js and

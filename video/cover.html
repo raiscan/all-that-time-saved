@@ -32,8 +32,8 @@
 <script>
   // the format (?fmt=4x3|1x1|9x16|16x9, default 4x3): the frame's working size, which core.js reads (4:3 1920×1440,
   // square 1920×1920, portrait 1080×1920, landscape 1920×1080); only the designs laid out for it are offered (cover.js)
-  window.COVER_FMT = (f => ['4x3', '1x1', '9x16', '16x9'].includes(f) ? f : '4x3')(new URLSearchParams(location.search).get('fmt'));
-  PROJECT.size = { '4x3': [1920, 1440], '1x1': [1920, 1920], '9x16': [1080, 1920], '16x9': [1920, 1080] }[COVER_FMT];
+  window.COVER_FMT = (f => ['4x3', '1x1', '9x16', '16x9', 'banner'].includes(f) ? f : '4x3')(new URLSearchParams(location.search).get('fmt'));
+  PROJECT.size = { '4x3': [1920, 1440], '1x1': [1920, 1920], '9x16': [1080, 1920], '16x9': [1920, 1080], banner: [1920, 640] }[COVER_FMT];
   document.getElementById('out').style.aspectRatio = PROJECT.size.join(' / ');
 </script>
 <script src="../src/core.js"></script>

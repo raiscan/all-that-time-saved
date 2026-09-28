@@ -25,6 +25,7 @@
 //   node render.mjs --page=video/cover.html --query=fmt=9x16 --loop=worlds_title --stills=0 --os=1 --ss=3 ...        1080×1920
 //   (--os=2: 2160×3840 from the same drawing)
 //   node render.mjs --page=video/cover.html --query=fmt=16x9 --loop=worlds_title --stills=0 --os=2 --ss=3 ...        3840×2160
+//   node render.mjs --page=video/cover.html --query=fmt=banner --loop=worlds_title --stills=0 --os=1.5 --ss=3 ...    2880×960 (the README banner)
 //   (YouTube's: the title card, and its thumbnail, 1280×720 JPEG under 2 MB, downscaled from this with Lanczos)
 const COVER = { first: 'worlds', title: 'All That Time Saved', artist: 'UncleHerbert', designs: [], fmt: window.COVER_FMT || '4x3' };
 (() => {
@@ -782,7 +783,20 @@ const COVER = { first: 'worlds', title: 'All That Time Saved', artist: 'UncleHer
           riso: 760 * kp,
         };
       },
+      // the README's banner (3:1, the user: "a banner to go at the top of the README"): 16:9's worlds and cast scaled by
+      // BAN.f about each panel's centre and set on a ground at BAN.g (so every face fits the strip under the title, which
+      // stays a row across the top at full size)
+      banner: () => {
+        const B = LAYOUT['16x9'](), E = [0, 370, 748, 1124, 1536, 1920], LK = ['ink', 'card', 'bank', 'xerox', 'doodle'], f = BAN.f, G = 1130;
+        const cxOf = lk => { const i = LK.indexOf(lk); return (E[i] + E[i + 1]) / 2; };
+        const up = lk => BAN.up[lk] || 0, upW = lk => BAN.upW[lk] ?? up(lk);
+        const panels = B.panels.map(pn => { const cx = cxOf(pn.lk); return { ...pn, bt: [cx * (1 - f) + f * pn.bt[0], BAN.g - upW(pn.lk) - G * f + f * pn.bt[1], f * pn.bt[2]] }; });
+        const cast = Object.fromEntries(Object.entries(B.cast).filter(([id]) => !BAN.omit.includes(id)).map(([id, c]) => { const lk = c.pan.split(' ')[0], cx = cxOf(lk), [X, Y, k] = c.at, [nx, ny] = BAN.nudge[id] || [0, 0];
+          return [id, { ...c, at: [cx + f * (X - cx) + nx, BAN.g - up(lk) + f * (Y - G) + ny, k * f] }]; }));
+        return { ...B, panels, cast, title: { at: B.title.at.map(([x]) => [x, BAN.ty]), q: BAN.q }, sig: { ...B.sig, y: BAN.ty + 12 }, riso: B.riso * f };
+      },
     };
+    const BAN = { f: .7, g: 820, ty: 88, q: 1.02, up: { card: 110, bank: 70, doodle: 90 }, upW: { doodle: 20 }, nudge: { copilot: [125, 0], him: [150, 0] }, omit: ['codey'] };   // (up: a panel's world and cast raised; upW: its world alone; nudge: a figure moved; omit: left out, Codey's only a fragment in the strip)   // (the banner: its scale on 16:9, its ground (off the strip's bottom), the title row)
     P.LAYOUT = LAYOUT;
     P.L = (LAYOUT[COVER.fmt] || LAYOUT['4x3'])();
     RISO_SHOTS.COVER_W = { h: P.L.riso };   // (the riso panel's dot screen, sized to her: RISO_N)
@@ -866,7 +880,7 @@ const COVER = { first: 'worlds', title: 'All That Time Saved', artist: 'UncleHer
     c.strokeStyle = BIRO; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(-G.size * 2.3, 16); c.quadraticCurveTo(0, 26, G.size * 2.4, 10); c.stroke();
     c.restore();
   }
-  design('worlds', (t, titled) => WD.art(t, titled), worldsText, ['4x3', '1x1', '9x16', '16x9']);
+  design('worlds', (t, titled) => WD.art(t, titled), worldsText, ['4x3', '1x1', '9x16', '16x9', 'banner']);
 
   // =====================================================================================================================
   // TORN: the torn poster (C1f's box room, chorus.js). Her cheap riso copy of the 1930s ad, pinned on the box room's
