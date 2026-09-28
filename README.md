@@ -1,6 +1,8 @@
-![All That Time Saved: five worlds, one title across them, by UncleHerbert](docs/banner.jpg)
+[![All That Time Saved: five worlds, one title across them, by UncleHerbert](docs/banner.jpg)](https://www.youtube.com/watch?v=G2m9CwD_ocY)
 
 # All That Time Saved
+
+**Watch it on YouTube: [All That Time Saved](https://www.youtube.com/watch?v=G2m9CwD_ocY)**
 
 A music video for UncleHerbert's song "All That Time Saved": six minutes of animation drawn entirely in code (p5.js and
 p5.brush, rendered headless), through five media: 1930s rubber hose, cut card, risograph, banknote engraving and
