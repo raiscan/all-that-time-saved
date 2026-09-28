@@ -470,10 +470,15 @@
     return { ...mood, pose, holdL: coconut, lean: -.85 - .2 * ease(seg(l, tS - .05, tS + .4)), lookX: .5, lookY: -.1 };
   }
   // her in the hammock: settles back, her far arm behind her head on "work", the coconut up on "Lovely"
+  // her lean lying back in the sling (rad, the body tipped back from sitting): the first page's hammock is long and shallow
+  // and she lies at its low point, where at the second page's lean she read as sitting up, a crunch (the user); the second's
+  // is short and steep, and she lies back in it at -1.05
+  const HM_LEAN = k => k ? -1.05 : -1.3;
   function herHammock(l, wLess, wWork, wLove, k) {
     const mood = emotions(l, [[0, 'neutral'], [wWork, 'happy'], [wLove - .1, 'happy', { mouth: 'grin' }]], { take: .5 });
     const { tS, pose } = hmLounge(l, wLess, wWork, wLove);
-    return { ...mood, pose, holdL: coconut, lean: -.85 - .2 * ease(seg(l, tS - .05, tS + .4)), lookX: .5, lookY: -.1 };
+    const L0 = HM_LEAN(k);
+    return { ...mood, pose, holdL: coconut, lean: L0 + .2 - .2 * ease(seg(l, tS - .05, tS + .4)), lookX: .5, lookY: -.1 };
   }
   // ======================================================================================================
   // P1b / P2b: "Less pay? Get fucked." A shadow falls over the page; the stamp swings in on "Less pay?", jerks up on
@@ -521,7 +526,7 @@
       // arm is short: any target forward of him was out of reach, and the arm, straightened toward it, ended with the
       // coconut at his chin or his eye whatever the target (so up along his body, not forward across it))
       const up = him ? ease(seg(l, tSee - .05, tSee + .2)) * (1 - ease(seg(l, T.get - .1, T.get + .12))) : 0;
-      return { ...mood, ...lk, pose, holdL: coconut, lean: -1.05 + .42 * up };
+      return { ...mood, ...lk, pose, holdL: coconut, lean: (him ? -1.05 : HM_LEAN(k)) + .42 * up };
     };
     look('doodle');
     // (the drift on ones, carried on from P1a/P2a's slow push: the same drawing across the cut, so it starts where that
