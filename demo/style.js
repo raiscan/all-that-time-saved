@@ -2089,7 +2089,7 @@ function inkGlove(pose, s, o, S, cap) {
   if (late) for (const f of [...F, th]) piece(f, col, { role: w * .8 });
 }
 // hand(x, y, ang, s, o): a cartoon hand at the wrist (x, y) pointing along ang, size s (≈ palm length).
-//   o.pose: relax | open | tray (palm up, held out flat, seen edge on: the little finger's side toward us) | point | fist | thumb | hold · o.glove (white glove with cuff and stitching) · o.col skin
+//   o.pose: relax | open | tray (palm up, held out flat, seen edge on: the little finger's side toward us) | point | fist | thumb | hold | keys (on a keyboard, typing: o.tap) · o.glove (white glove with cuff and stitching) · o.col skin
 //   o.sw · o.mirror (thumb on the other side) · o.hold(s) draws a held prop between the palm and the fingers · o.maxTone
 //   (bare skin: caps how dark the tone looks may print it, as piece() does)
 function hand(x, y, ang, s, o = {}) {
@@ -2103,6 +2103,24 @@ function hand(x, y, ang, s, o = {}) {
     piece(cap(.42 * s, -.16 * s, .74 * s, -.3 * s, .11 * s), mixCol(col, NOIR.ink, .12), { sw: sw * .8, key: k + 'thumb', lift: 2, flatCard: true, maxTone: o.maxTone });
     piece(curvy(S([[0, -.19], [.45, -.2], [.9, -.16], [1.25, -.11], [1.46, -.08], [1.53, -.02], [1.48, .05], [1.28, .07], [.98, .09], [.9, .14], [.5, .19], [0, .19]]), 4), col, { sw, shade, depth: s * .12, key: k + 'palm', lift: 3, maxTone: o.maxTone });
     dline(S([[.9, .02], [1.2, .0], [1.44, -.02]]), sw * .45, shade);   // (the little finger along the edge)
+    pop(); return;
+  }
+  if (pose === 'keys') {   // on a keyboard, seen from beyond it and a little above: the back of the hand, foreshortened, three
+    // fingers curled down onto the keys (+x), the thumb in toward the space bar (+y: the inner side, mirrored for the left).
+    // o.tap, a clock (the shot's, on twos): at each whole number one finger presses (reaching further down onto its key) and
+    // another lifts, now and then none; the same number gives the same drawing. Left out, all three rest on the keys.
+    // (a bare hand starts a little out from the wrist: a sleeve's cuff over the wrist hid most of the foreshortened back)
+    if (!o.glove) translate(.3 * s, 0);
+    let hk = 7; for (const c of String(k)) hk = (hk * 31 + c.charCodeAt(0)) % 100003;
+    const n = o.tap == null ? null : Math.floor(o.tap + 1e-6), r1 = n == null ? 1 : hash(n * 1.618 + hk * .37), r2 = n == null ? 0 : hash(n * 2.71 + hk * .53);
+    const down = r1 > .82 ? -1 : Math.floor(r1 / .82 * 3), up = n == null ? -1 : (Math.max(down, 0) + 1 + Math.floor(r2 * 2)) % 3;
+    const th = cap(.14 * s, .34 * s, .3 * s, .6 * s, .13 * s);
+    const F = [-.3, -.03, .24].map((fy, i) => { const e = i === down ? 1 : i === up ? -1 : 0; return cap(.4 * s, fy * s, (.64 + .13 * e) * s, (fy + .02) * s, (e < 0 ? .13 : .145) * s); });
+    const back = curvy(S([[0, -.34], [.2, -.45], [.42, -.46], [.52, -.24], [.54, .04], [.48, .3], [.3, .42], [.06, .38], [-.03, 0]]), 4);
+    piece(th, col, { sw: sw * .8, key: k + 'thumb', lift: 2, flatCard: true, maxTone: o.maxTone });
+    F.forEach((f, i) => piece(f, col, { sw: sw * .8, key: k + 'f' + i, lift: 2, flatCard: true, maxTone: o.maxTone }));
+    piece(back, col, { sw, shade, depth: s * .18, key: k + 'palm', lift: 3, maxTone: o.maxTone });
+    if (o.glove) for (const fy of [-.2, .02]) dline([[.18 * s, fy * s], [.4 * s, fy * 1.1 * s]], sw * .4, '#A89E90');
     pop(); return;
   }
   const palm = curvy(S([[.05, -.42], [.55, -.5], [.85, -.35], [.92, 0], [.85, .38], [.55, .5], [.05, .42], [0, 0]]), 4);

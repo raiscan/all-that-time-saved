@@ -153,12 +153,12 @@
   // and hand-placed ones blend (pPoses drops the 'u' flag and would mix the two spaces).
   function ppU(P, pose, o = {}) {
     const p = typeof pose === 'string' ? PPOSE[pose] : pose, Fr = personFrame(P, o), QS = o.view === 'q' ? PP_QS : 0, shX = P.top.sh[0];
-    const conv = s => s[6] === 'u' ? s : [s[0] * shX + QS, s[1] >= 0 ? Fr.ys + s[1] * (Fr.yh - Fr.ys) : Fr.ys + s[1] * (Fr.ys - Fr.top), s[2], s[3], s[4], s[5], 'u'];
+    const conv = s => s[6] === 'u' ? s : [s[0] * shX + QS, s[1] >= 0 ? Fr.ys + s[1] * (Fr.yh - Fr.ys) : Fr.ys + s[1] * (Fr.ys - Fr.top), s[2], s[3], s[4], s[5], 'u', s[7]];
     return { L: conv(p.L), R: conv(p.R) };
   }
-  function uPoses(P, o, t, keys, blend = .3) {
+  function uPoses(P, o, t, keys, blend = .3) {   // (keeps a spec's reach, [7])
     const b = pPoses(t, keys.map(([t0, p]) => [t0, ppU(P, p, o)]), blend);
-    return { L: [...b.L.slice(0, 6), 'u'], R: [...b.R.slice(0, 6), 'u'] };
+    return { L: [...b.L.slice(0, 6), 'u', b.L[7]], R: [...b.R.slice(0, 6), 'u', b.R[7]] };
   }
 
   // ================================================================================================================
@@ -179,16 +179,46 @@
   const CPE = [978, OF.deskTop.y];   // the desk's right end: where Copilot hops to give her the card
   const CARD = { hop: [T.repl + .08, T.repl + .42], give: T.repl + .5, tuck: [T.wrote + .32, T.card - .06] };
   const tlStep = t => t < OD.tl[0] ? -1 : t >= OD.tl[1] ? 4 : Math.floor(4 * (t - OD.tl[0]) / (OD.tl[1] - OD.tl[0]));
-  // her seated typing (u targets in her own frame: the keys are 5.5u up, on the desk top)
-  const herType = (t, on = 1) => { const a = on * Math.max(0, Math.sin(t * TAU * 3.2)), b = on * Math.max(0, Math.sin(t * TAU * 3.2 + 2.4));
-    return { L: [-1.3, -5.72 - .25 * a, .5, 'relax', 1, 1.25, 'u'], R: [1.35, -5.72 - .25 * b, .5, 'relax', 1, 1.9, 'u'] }; };
+  // Typing at her desk (the user: the hands were under the desk). Whoever sits in her chair has the hands on her keyboard
+  // (OF.kbd, real size against them): the wrists level at its far edge (the typist's side), the fingers down on the keys
+  // (hand 'keys': o.tap presses one finger at a time, on twos). The body stays behind the desk; the hands and forearms are
+  // redrawn over the desk top (deskLate), the arms' own late layer, clipped at the desk's far edge so only what comes
+  // forward over it moves in front.
+  // Her: the elbows back at her sides just above the desk top, the upper arms going back and the forearms coming forward and
+  // down over the desk to the keys (the arm at .47 of its length: foreshortened); u targets in her own frame. The wrists
+  // drift a little across the keys every few drawings (t: on twos); on: how busy (.25: a key now and then as she looks up)
+  const KB = OF.kbd, kbW = (KB.far - 11 - CH[1]) / HU;   // (the wrists' height: the cuffs just behind the keyboard, the hands on it)
+  const herType = (t, on = 1) => { const n = Math.floor(t * 12 + 1e-6), d = s => on * .12 * (hash(Math.floor(n / 3) * 1.7 + s) - .5);
+    return { L: [-.95 + d(-1), kbW, .06, 'keys', 1, Math.PI - 1.95, 'u', .47], R: [.95 + d(1), kbW, .06, 'keys', 1, 1.95, 'u', .47] }; };
+  // (off the keys toward her lap: the hands lift back over the desk's far edge first, then drop behind it; blended straight
+  // down to her lap they slid forward across the desk top to its front edge)
+  const herLift = { L: [-1.05, -6.3, .1, 'keys', 1, 1.3, 'u', .45], R: [1.05, -6.3, .1, 'keys', 1, 1.84, 'u', .45] };   // (the typing hand, at rest: a relaxed hand draped past the keyboard)
+  // Copilot in her chair, kneeling up on it to reach (seated in it, only its head showed over the desk): its seat height
+  // (u), and its typing pose there (its own frame, in u: the ground point under the chair, the kneel lifting the body)
+  const CPS = 5.5;
+  const cpType = (seatH, t, busy = 1) => { const n = Math.floor(t * 12 + 1e-6), y = (KB.far - 4 - CH[1]) / HU + seatH - 1.02, d = s => busy * .1 * (hash(n * 1.3 + s) - .5), dip = s => .06 * (hash(n * 2.9 + s * 5) > .55);
+    return { L: [-1.2 + d(-1), y + dip(-1), .4, 'keys', 1, Math.PI - 1.85], R: [1.2 + d(1), y + dip(1), .4, 'keys', 1, 1.85] }; };   // (its noodle arms bowed out past its sides: straight down its front they vanished into the suit)
+  // the late layer: hands and forearms on her desk top, clipped to what's in front of its far edge
+  const deskLate = fns => { if (fns.length) clipPoly(R4(OF.deskTop.x0 - 40, OF.deskTop.far - 1.5, OF.deskTop.x1 + 40, OF.deskTop.front + 60), () => fns.forEach(f => f())); };
   // carrying a box: the box centre bx, by (u, own frame); the hands on its sides
   const carry = (bx, by, w = 2.6) => ({ L: [bx - w, by + .2, .35, 'hold', 1, -.15, 'u'], R: [bx + w, by + .2, .35, 'hold', 1, Math.PI + .15, 'u'] });
-  const BOXW = 150, BOXC = [1.9, -8.3];   // her box: its width, and its centre in her frame when she carries it
-  // her carrying her box: her hands under its bottom corners (bottom at BOXC[1] + 1.9), arms nearly straight, elbows in at
-  // her sides, the box a touch lower (at -8.6, gripped by its sides at mid-height, her near elbow jutted out sideways, a
-  // chicken wing, and her far hand was hidden)
-  const herCarry = () => ({ L: [BOXC[0] - 2.3, BOXC[1] + 2.1, .02, 'hold', 1, -.35, 'u'], R: [BOXC[0] + 2.3, BOXC[1] + 2.1, .02, 'hold', 1, Math.PI + .35, 'u'] });
+  const BOXW = 150, BOXC = [2.0, -8.9], BOXH = BOXW / 2 / HU;   // her box: its width, its centre in her frame when she carries it (the bottom at BOXC[1] + 1.9), its half-width (u)
+  // Her carrying her box (the user: the arms hung straight behind it, the hands out of sight, so it floated). She holds it
+  // the way people do: by its ends, low on its sides (the boss holds it higher up them), the fingers round onto its face,
+  // the elbows bent at her sides and the forearms coming forward to it; held a little higher than it was. The depth order is
+  // one throughout, the pick-up included: her near arm (L) in front of the box and all of it (redrawn after it, o.late
+  // 'arm', foreshortened: coming toward us round the box's near end), her far arm behind it with only its hand coming round
+  // the far end (o.late 'hand', once it has hold). (Under the bottom corners, the arms hung nearly straight with the elbows
+  // in; gripped at mid-height at full length the near elbow jutted out sideways and the far hand was hidden.) herGrip(fx,
+  // fb): the box's bottom middle in her frame (u, before a flip).
+  // (her shoulders, the arms' roots in 3/4, her frame: what she can reach. The near arm is foreshortened as it comes
+  // round the box's near end up close, and reaches out full length for it at the boss's arm's length)
+  const HER_SH = (() => { const Fr = personFrame(HER_C, { view: 'q' }), y = Fr.ys + Math.max(HER_C.top.sh[1], .15) + HER_C.body.armW * .4, x = HER_C.top.sh[0] - HER_C.body.armW * .42;
+    return { L: [-x * .93 + PP_QS, y], R: [x * .97 + PP_QS, y] }; })();
+  const herGrip = (fx, fb) => { const L = [fx - BOXH - .05, fb - .62], d = Math.hypot(L[0] - HER_SH.L[0], L[1] - HER_SH.L[1]);
+    return { L: [...L, .1, 'hold', 1, -.2, 'u', clamp(d / (HER_C.body.arm * .9), .66, 1)], R: [fx + BOXH + .05, fb - .62, .15, 'hold', 1, Math.PI + .2, 'u'] }; };
+  const herCarry = () => herGrip(BOXC[0], BOXC[1] + 1.9);
+  const herReaches = (spec, s) => { const r = HER_SH[s < 0 ? 'L' : 'R']; return Math.hypot(spec[0] - r[0], spec[1] - r[1]) <= HER_C.body.arm * (spec[7] ?? 1) * .96; };
   const boxAt = (x, y, flip) => [x + (flip ? -1 : 1) * BOXC[0] * HU, y + (BOXC[1] + 1.9) * HU];   // its bottom middle (world)
   const odCam = t => kf(t, [
     [14.52, [872, 512, 1.1]], [16.7, [860, 518, 1.13]], [17.5, [650, 556, 1.46]], [18.2, [606, 552, 1.74]],
@@ -215,6 +245,8 @@
     // time-lapse it learns her job (and her look); at five it's in her chair; then it makes her a card ----
     const cpo = { boilKey: 'v1cp', t: tt };
     let cp = null;   // [x, y, opts, layer: 'chair' | 'desk' | 'floor']
+    const cpLate = [], herLate = [];   // (hands on her keyboard, redrawn over the desk top: deskLate)
+    const boxLate = [];   // (hands on her box, redrawn over it)
     // (its hops: no shadow of its own in the air (it hung under its feet, over the window view); instead the shadow where
     // it took off fades, and one grows where it will land as it comes down: hopSh { off: [x, y], on: [x, y], k })
     let hopSh = null;
@@ -238,11 +270,12 @@
         cp = [p[0], p[1], { ...mood, dy: (mood.dy || 0) + hop.dy, sq: (mood.sq || 0) + J.sq + hop.sq, pose, rot: air ? -.25 * Math.sin(k * Math.PI) : 0, noShadow: air }, p[1] < OF.deskTop.y + 30 ? 'desk' : 'floor'];
       }
     } else if (st === 0) cp = [CPD[0], CPD[1], { ...feel('excited', tt), emote: null, pose: 'typing' }, 'desk'];
-    else if (tt < CARD.hop[0]) {
+    else if (tt < CARD.hop[0]) {   // (in her chair, kneeling up on it, typing fast on her keyboard; from "oh" it turns to her)
       const mood = st < 4 ? feel('determined', tt) : emotions(tt, [[0, 'happy'], [T.oh + .05, 'sad', { lookX: 1, lookY: -.2, emote: null }], [T.repl - .05, 'idea', { lookX: 1, emote: null }]]);
-      cp = [CH[0], CH[1], { ...mood, seated: true, chair: false, seatH: 4.3, pose: tt > T.oh ? 'idle' : 'typing', keyboard: false, disguise: st >= 2, view: tt > T.oh ? 'q' : 'front' }, 'chair'];
+      const typing = tt <= T.oh;
+      cp = [CH[0], CH[1], { ...mood, seated: true, chair: false, seatH: CPS, pose: typing ? cpType(CPS, tt) : 'idle', tap: tt * 12, disguise: st >= 2, view: typing ? 'front' : 'q', late: typing ? { L: 'arm', R: 'arm', out: cpLate } : null }, 'chair'];
     } else {   // a hop over to the desk's end with the card it made her; it offers it, then tucks it into her box
-      const k = seg(tt, CARD.hop[0], CARD.hop[1]), J = jump(tt, CARD.hop[0], CARD.hop[1], 0), from = [CH[0], CH[1] - 4.3 * HU + 1.3 * HU];
+      const k = seg(tt, CARD.hop[0], CARD.hop[1]), J = jump(tt, CARD.hop[0], CARD.hop[1], 0), from = [CH[0], CH[1] - (CPS - 1.3) * HU];
       const p = k < 1 ? arcPt(from, CPE, 260, k) : CPE;
       const mood = emotions(tt, [[0, 'idea'], [CARD.hop[1], 'hopeful', { lookX: .9, lookY: -.2 }], [CARD.tuck[1], 'happy', { lookX: .8 }], [CUT.c - .1, 'happy', { lookX: -.6 }]]);
       const tuck = tt >= CARD.tuck[0], reach = { L: [1.9, -2.6, .3, 'hold', 1, .2], R: [3.2, -2.7, .25, 'hold', 1, .1] };
@@ -259,7 +292,13 @@
       const so = { seated: true, seatH: CH[3] }, up = { L: [-1.6, -7.6, .45, 'open', 1, -1.6, 'u'], R: [1.7, -7.7, .45, 'open', 1, -1.55, 'u'] };
       // (from "Wow" her near hand rests in her lap, the other typing on: typing, it reached down under Copilot's shoes on
       // the desk, never seen, and showed as a bare cuff by the mug when Copilot hopped)
-      let pose = st === 0 ? herType(tt * 1.4, .6) : uPoses(HER_C, so, tt, [[0, herType(tt)], [T.nine - .06, herType(tt, .25)], [T.nine + .45, 'lap'], [T.what - .02, 'shrug'], [T.do_, herType(tt)], [T.wow - .12, { L: PPOSE.lap.L, R: herType(tt).R }]], .22);
+      // (each key says which hands are on the desk top, redrawn over it: on the keys, or lifting back off them; the lap and
+      // the shrug are behind it)
+      const HK = [[0, herType(tt), 'LR'], [T.nine - .06, herType(tt, .25), 'LR'], [T.nine + .45, herLift, 'LR'], [T.nine + .6, 'lap', ''], [T.what - .02, 'shrug', ''], [T.do_, herType(tt), 'LR'],
+        [T.wow - .12, { L: herLift.L, R: herType(tt).R }, 'LR'], [T.wow + .03, { L: PPOSE.lap.L, R: herType(tt).R }, 'R']];
+      let hk = 0; while (hk + 1 < HK.length && tt >= HK[hk + 1][0]) hk++;
+      const onKeys = st === 0 ? 'LR' : HK[hk][2];
+      let pose = st === 0 ? herType(tt * 1.4, .6) : uPoses(HER_C, so, tt, HK.map(([t0, p]) => [t0, p]), .22);
       // (the shrug's in-between drawings, on "What" up out of her lap and on "do" back down to the keys, the hands going
       // round the outside of an arc so her elbows stay down and out: up, the hands already out by her shoulders, the elbows
       // down by her sides; down, the forearms swung in level toward the keys. Blended straight, the hands passed close
@@ -267,11 +306,14 @@
       // down both elbows flared out at shoulder height (17.83))
       const midMove = t0 => { const k = seg(tt, t0, t0 + .22); return k > 0 && backOut(k) < .95; };
       if (st !== 0 && midMove(T.what - .02)) pose = { L: [-3.0, -8.1, .45, 'open', 1, null, 'u'], R: [3.0, -8.1, .45, 'open', 1, null, 'u'] };
-      else if (st !== 0 && midMove(T.do_)) pose = { L: [-1.2, -6.3, .48, 'relax', 1, null, 'u'], R: [1.2, -6.3, .48, 'relax', 1, null, 'u'] };
-      person(CH[0], CH[1], HU, HER_C, { ...mood, ...so, pose, boilKey: 'v1her', sing: V1_HER_LIPS });
+      else if (st !== 0 && midMove(T.do_)) pose = herLift;   // (over the desk's far edge, the elbows at her sides: the hands coming forward onto the keys)
+      // (her typing: a finger a drawing or so; slower as she looks up at the clock)
+      const tap = tt * (tt >= T.nine - .06 && tt < T.nine + .45 ? 3 : 8);
+      person(CH[0], CH[1], HU, HER_C, { ...mood, ...so, pose, tap, boilKey: 'v1her', sing: V1_HER_LIPS, late: { L: onKeys.includes('L') && 'arm', R: onKeys.includes('R') && 'arm', out: herLate } });
     }
     let cpHand = null;   // (its hand this frame: the leaving card leaves from it)
     officeFront(tt, tt, { clock: [hh, mm], plant: !packed, mug: !packed, onDesk: () => {
+      deskLate(herLate.concat(cpLate));   // (hands on her keyboard: hers, or Copilot's in her chair)
       if (hopSh) shade(hopSh.on, ease(seg(hopSh.k, .35, 1)));
       if (cp && cp[3] === 'desk') { const r = copilot(cp[0], cp[1], HU, { ...cpo, ...cp[2] }); cpHand = r && r.hands && r.hands.R; } } });
     if (hopSh) shade(hopSh.off, 1 - seg(hopSh.k, 0, .3));
@@ -301,7 +343,10 @@
       // "We won't be needing you", the line he's lip-syncing)
       const bxu = 3.0 + 1.1 * fwd, byu = -9.0 + .95 * fwd;
       const pose = done ? uPoses(V1_BOSS, { view: 'q' }, tt, [[0, hold(bxu, byu)], [XF0[1] + .05, 'belly']]) : hold(bxu, byu);
-      bossAt = [bx, BOSSS[1], { ...mood, view: 'q', flip: true, pose, walk: out > 0 && out < 1 ? -out * 2.4 : null }];
+      // (his fingers round the box's ends, over its face, while he holds it out; once it's on its way to her his hands are
+      // behind it, letting go)
+      const grip = !done && xk <= 0 && 'hand';
+      bossAt = [bx, BOSSS[1], { ...mood, view: 'q', flip: true, pose, walk: out > 0 && out < 1 ? -out * 2.4 : null, late: { L: grip, R: grip, out: boxLate } }];
       if (!done) box = { from: [bx - bxu * HU, BOSSS[1] + (byu + 1.9) * HU], k: xk };
     }
     // ---- her, standing from the time-lapse on: she takes the box (it lands on "oh"), turns back to her desk ----
@@ -309,18 +354,27 @@
       const turned = tt >= T.oh + .38, turnF = tt >= T.oh + .3 && tt < T.oh + .38;
       const mood = st < 4 ? { ...feel(st === 1 ? 'bored' : 'suspicious', tt), lookX: -.6 } : emotions(tt, [[0, 'suspicious', { lookX: .6 }], [T.we + .05, 'neutral', { lookX: .9, lookY: -.2 }], [T.needing + .1, 'surprised', { lookX: .6, lookY: .3, emote: null, mouth: 'flat' }],
         [T.oh - .04, 'sad', { lookX: .2, lookY: .9, emote: null }], [T.oh + .38, 'sad', { lookX: .6, lookY: .1, emote: null }], [CARD.hop[1], 'surprised', { lookX: .8, lookY: .3, emote: null, mouth: 'flat' }], [CARD.tuck[1], 'sad', { lookX: .6, lookY: .8, emote: null }]], { take: .6 });
-      const hug = herCarry(), reach = { L: [2.2, -8.2, .35, 'open', 1, -.3, 'u'], R: [5.0, -8.3, .35, 'open', 1, -.2, 'u'] };
-      const pose = st < 4 ? 'cross' : uPoses(HER_C, { view: 'q' }, tt, [[0, 'low'], [T.you - .05, reach], [T.oh - .02, hug]]);
       const got = day && tt >= XF0[1], sink = got ? .12 * Math.exp(-5 * (tt - XF0[1])) * Math.cos(12 * (tt - XF0[1])) + .06 : 0;
-      person(HERS[0], HERS[1], HU, HER_C, { ...mood, sq: (mood.sq || 0) + sink, view: turnF ? 'front' : 'q', flip: st < 4 || turned, tilt: got ? .1 : 0, pose, boilKey: 'v1herS', sing: V1_HER_LIPS });
+      // the box first (from the boss's hands into hers, landing on "oh"; then in her arms), so her hands can hold it wherever
+      // it is: from "you" she reaches for its ends, her near hand round the near end, the far one coming round the far end
+      // once it has hold (as the box comes to her)
       const hb = boxAt(HERS[0], HERS[1] + sink * 30, turned);
       if (box && box.k > 0) { const bk = easeIn(box.k); box.at = [lerp(box.from[0], hb[0], bk), lerp(box.from[1], hb[1], bk) - 30 * Math.sin(box.k * Math.PI)]; }
       else if (got) box = { at: hb };
+      let pose = 'cross', late = null;
+      if (st >= 4) {
+        const at = box ? box.at || box.from : hb, dy = (mood.dy || 0) * 1.1, grip = herGrip((at[0] - HERS[0]) / HU * (turned ? -1 : 1), (at[1] - HERS[1]) / HU - dy);
+        const R0 = T.you - .05, hold = tt >= R0 + .3;   // (her hands there once the reach has blended in)
+        pose = uPoses(HER_C, { view: 'q' }, tt, [[0, 'low'], [R0, grip]]);
+        late = { L: tt >= R0 && 'arm', R: hold && herReaches(grip.R, 1) && 'hand', out: boxLate };
+      }
+      person(HERS[0], HERS[1], HU, HER_C, { ...mood, sq: (mood.sq || 0) + sink, view: turnF ? 'front' : 'q', flip: st < 4 || turned, tilt: got ? .1 : 0, pose, late, boilKey: 'v1herS', sing: V1_HER_LIPS });
     }
     if (box && !box.at) box.at = box.from;
     if (bossAt) person(bossAt[0], bossAt[1], HU, V1_BOSS, { ...bossAt[2], boilKey: 'v1boss', sing: V1_BOSS_LIPS });
     if (box) {
       v1Box(box.at[0], box.at[1], BOXW, 'v1box', day ? ease(seg(tt, T.oh - .05, T.oh + .5)) : 0);
+      boxLate.forEach(f => f());   // (the hands holding it, over it)
       // the leaving card, tucked into her box by Copilot (standing up in it, its gold star to us)
       if (tt >= CARD.tuck[0]) {
         // (a little toss from its outstretched hand: its arms don't reach the box, and the card used to glide there from a
@@ -389,7 +443,7 @@
   // the copies: when each comes out of the tray, where it lands, how cheap it is, and its pose there
   const COPIES = [
     { out: T.me + .02, to: [972, OF.deskTop.y], cheap: .1, pose: 'typing', gen: 1 },
-    { out: T.cheaper, fan: 0, to: [CH[0], CH[1]], seat: 4.3, cheap: .3, pose: 'typing', gen: 2 },
+    { out: T.cheaper, fan: 0, to: [CH[0], CH[1]], seat: CPS, cheap: .3, pose: 'typing', gen: 2 },   // (in her chair, kneeling up to her keyboard, as Copilot did)
     { out: T.cheaper, fan: 1, to: [506, OF.deskTop.y], cheap: .45, pose: 'typing', gen: 3 },
     // (on top of the stack of leaving cards V1c left on her desk: it used to wave from the monitor's top, where the stack stands)
     { out: T.cheaper, fan: 2, to: [stackCard(STACK.n1 - 1)[0], stackCard(STACK.n1 - 1)[1] - 21], cheap: .6, pose: 'wave', gen: 4 },
@@ -476,13 +530,15 @@
       v1Gen(riso ? 1 : 0, () => copilot(CPOP[0], CPOP[1], HU, { ...cpMood, sq: (cpMood.sq || 0) + land.sq, disguise: true, view: 'q', flip: true, pose, boilKey: 'v1cpO', t: tt,
         holdL: tt < FEED.place[0] ? s => { push(); rotate(.2); v1Work(s * 2.2, 'v1wkH'); pop(); } : null }));
       // the copies at the desk: the chair and desk-top ones sit in the desk's layers
-      const st = COPIES.map(c => ({ c, s: v1CopyState(c, tt, t) }));
+      const st = COPIES.map(c => ({ c, s: v1CopyState(c, tt, t) })), copLate = [];
       const cop = ({ c, s }) => {
         const J = s.air != null ? { sq: -.15 * Math.sin(s.air * Math.PI), dy: 0 } : s.landed != null ? jump(tt, tt - s.landed - .01, tt - s.landed, 0) : { sq: 0, dy: 0 };
         const mood = feel(s.landed != null ? (c.pose === 'typing' ? 'determined' : 'happy') : 'excited', tt + c.gen * .37, { seed: c.gen });
-        const seated = s.landed != null && c.seat;
-        const o = { ...mood, emote: null, sq: (mood.sq || 0) + J.sq, disguise: true, cheap: c.cheap, pose: s.landed != null ? c.pose : 'idle', seated, chair: false, seatH: c.seat || 3.3,
-          keyboard: c.pose === 'typing' && !seated, boilKey: 'v1cp' + c.gen, t: tt - c.gen * .05, seed: c.gen, view: s.air != null ? 'q' : 'front', flip: s.air != null, noShadow: true };   // (its shadow: landShadow, trayShadow)
+        const seated = s.landed != null && c.seat, ct = tt - c.gen * .05, atKeys = seated && c.pose === 'typing';
+        // (the one in her chair types on her keyboard, its hands redrawn over the desk top with the copy's print: copLate)
+        const late = atKeys ? [] : null; if (late) copLate.push({ gen: c.gen, fns: late });
+        const o = { ...mood, emote: null, sq: (mood.sq || 0) + J.sq, disguise: true, cheap: c.cheap, pose: s.landed != null ? (atKeys ? cpType(c.seat, ct) : c.pose) : 'idle', seated, chair: false, seatH: c.seat || 3.3,
+          keyboard: c.pose === 'typing' && !seated, tap: atKeys ? ct * 12 : null, late: late && { L: 'arm', R: 'arm', out: late }, boilKey: 'v1cp' + c.gen, t: ct, seed: c.gen, view: s.air != null ? 'q' : 'front', flip: s.air != null, noShadow: true };   // (its shadow: landShadow, trayShadow)
         v1Gen(1 + c.gen, () => {
           if (s.sheet && s.stand == null) {   // a printed sheet lying on the floor: the copy, flat (a tiny print of it on the paper)
             boilSeed('v1sheet' + c.gen); push(); translate(s.x, s.y); rotate((hash(c.gen * 1.7) - .5) * .5);
@@ -523,6 +579,7 @@
       st.filter(x => x.s && x.s.landed != null && x.c.seat).forEach(cop);
       officeFront(tt, tt, { clock: [17, 9], plant: false, mug: false, onDesk: () => {
         v1StackCards(STACK.n1);   // (V1c's stack of leaving cards, left on her desk: it prints into the copy with the rest)
+        copLate.forEach(({ gen, fns }) => v1Gen(1 + gen, () => deskLate(fns)));
         st.filter(x => onDesk(x.c)).forEach(landShadow);
         st.filter(x => x.s && x.s.landed != null && !x.c.seat && x.s.y < OF.deskTop.y + 30).forEach(cop);
       } });
@@ -534,9 +591,11 @@
       const hMood = emotions(tt, [[0, 'sad', { lookY: .4, emote: null }], [T.then - .3, 'surprised', { lookX: .8, emote: null, mouth: 'flat' }], [COPY.sweep[1] + .1, 'sad', { lookX: .9, emote: null }], [T.desk, 'bored', { lookX: .6 }], [T.left - .05, 'neutral', { lookX: 1 }]], { take: .6 });
       const hx = DOOR[0] + 460 * ease(out), walking = out > 0 && out < 1, fl = back && out <= 0;
       v1Gen(riso ? 1 : 0, () => {
-        person(hx, DOOR[1], HU, HER_C, { ...hMood, view: 'q', flip: fl, walk: walking ? out * 2.2 : null, pose: herCarry(), boilKey: 'v1herD', sing: V1_HER_LIPS });
+        const late = [];   // (her hands round its ends, over it: herGrip)
+        person(hx, DOOR[1], HU, HER_C, { ...hMood, view: 'q', flip: fl, walk: walking ? out * 2.2 : null, pose: herCarry(), late: { L: 'arm', R: 'hand', out: late }, boilKey: 'v1herD', sing: V1_HER_LIPS });
         const b = boxAt(hx, DOOR[1], fl);
         v1Box(b[0], b[1], BOXW, 'v1boxD', 1);
+        late.forEach(f => f());
         boilSeed('v1lcardD'); push(); translate(b[0] + 18, b[1] - BOXW * .62 - 22); rotate(.08); b2LeavingCard(70, 'v1lcD', .9); pop();
       });
       camEnd();

@@ -29,7 +29,9 @@
 // whichever way the hand points). b2Poses(TABLE, t, keys) blends between named poses over time, like poses().
 //
 // copilot also: seated (sits in an office chair; pose 'sit' implies it) · seatH (seat height, u, default 3.3) · chair
-//   (false: sit on whatever the shot provides) · keyboard (a keyboard under the hands; default on in 'typing') · card
+//   (false: sit on whatever the shot provides) · keyboard (a keyboard under the hands; default on in 'typing') · tap (the
+//   typing clock for its 'keys' gloves: default its t × 12 in 'typing') · late ({ L, R, out }: front arms queued to be drawn
+//   again over what the hands lie on, like person()'s o.late 'arm') · card
 //   (the leaving card in 'present': default true; or a function (s) drawing another prop) · disguise (HER look, cheaply:
 //   a curly bun wig with a pencil, round glasses over the goggles, a tomato-red scarf) · cheap 0..1 (thinner, paler,
 //   crooked goggles, a cracked lens, sticky-tape repairs, a shorter frayed scarf, and it bounces a touch late) · walk
@@ -104,6 +106,8 @@ function b2Mat() {
 const b2Apply = (M, p) => [M[0] * p[0] + M[2] * p[1] + M[4], M[1] * p[0] + M[3] * p[1] + M[5]];
 function b2Inv(M) { const [a, b, c, d, e, f] = M, det = a * d - b * c || 1e-9; return [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det]; }
 const b2To = (M0, p) => b2Apply(b2Inv(M0), b2Apply(b2Mat(), p));
+// Continue drawing in the frame M (a b2Mat() taken earlier), wherever this is called from: a rig's late redraws.
+function b2At(M) { const I = b2Inv(b2Mat()); applyMatrix(I[0] * M[0] + I[2] * M[1], I[1] * M[0] + I[3] * M[1], I[0] * M[2] + I[2] * M[3], I[1] * M[2] + I[3] * M[3], I[0] * M[4] + I[2] * M[5] + I[4], I[1] * M[4] + I[3] * M[5] + I[5]); }
 // Undo the rotation (and mirror) added since frame Mc was captured, so a held prop can stand upright in the character.
 function b2Upright(Mc) {
   const [a, b, c, d] = b2Mat(), [ia, ib, ic, id] = b2Inv(Mc), ra = ia * a + ic * b, rb = ib * a + id * b, rc = ia * c + ic * d, rd = ib * c + id * d;
@@ -439,7 +443,7 @@ function b2ArmHand(A, o) {
   let pose = A.hp, mirror = A.s < 0;
   if (pose === 'thumbUp' || pose === 'thumbDown') { mirror = pose === 'thumbDown' ? Math.cos(A.ang) > 0 : Math.cos(A.ang) < 0; pose = 'thumb'; }
   if (o.claw) b2Claw(A.wx, A.wy, A.ang, o.hs, { ...o.claw, sw: o.sw, key: o.key + 'cl', mirror, hold: o.hold, pose });
-  else hand(A.wx, A.wy, A.ang, o.hs, { pose, glove: true, sw: o.sw * .62, mirror, key: o.key + 'h', hold: o.hold });
+  else hand(A.wx, A.wy, A.ang, o.hs, { pose, glove: true, sw: o.sw * .62, mirror, key: o.key + 'h', hold: o.hold, tap: o.tap });
   return [A.wx + Math.cos(A.ang) * o.hs * .6, A.wy + Math.sin(A.ang) * o.hs * .6];
 }
 // A crab's claw shaped like a curly brace, at the wrist (x, y) pointing along ang: '{' with its cusp at the wrist and
@@ -502,11 +506,12 @@ function b2PermissionCard(w, key = 'perm', sw = 1) {
 function b2Keyboard(w, key = 'kbd', sw = 1) {
   const h = w * .26, C = B2CP;
   piece(curvy([[-w * .47, -h * .45], [w * .47, -h * .45], [w * .52, h * .5], [-w * .52, h * .5]], 1), C.board, { sw, shade: '#24222A', depth: h * .2, key: key + 'b', lift: 3 });
-  // three rows of keys, the space bar in the front row (perspective: the rows widen toward the front)
+  // three rows of keys, the space bar in the back row, toward whoever types on it behind it (perspective: the rows widen
+  // toward the front)
   for (let r = 0; r < 3; r++) {
     const y0 = lerp(-h * .24, h * .24, r / 2), sp = lerp(.84, .92, r / 2) * w, n = 7, kw = sp / n * .78, kh = h * .19;
     for (let i = 0; i < n; i++) {
-      if (r === 2 && i > 1 && i < 5) { if (i === 2) { const x0 = lerp(-sp / 2, sp / 2, 2.5 / n), x1 = lerp(-sp / 2, sp / 2, 4.5 / n); piece(curvy([[x0 - kw * .45, y0 - kh / 2], [x1 + kw * .45, y0 - kh / 2], [x1 + kw * .45, y0 + kh / 2], [x0 - kw * .45, y0 + kh / 2]], 1), C.key, { ink: null, key: key + 'sp', lift: 0, flatCard: true }); } continue; }
+      if (r === 0 && i > 1 && i < 5) { if (i === 2) { const x0 = lerp(-sp / 2, sp / 2, 2.5 / n), x1 = lerp(-sp / 2, sp / 2, 4.5 / n); piece(curvy([[x0 - kw * .45, y0 - kh / 2], [x1 + kw * .45, y0 - kh / 2], [x1 + kw * .45, y0 + kh / 2], [x0 - kw * .45, y0 + kh / 2]], 1), C.key, { ink: null, key: key + 'sp', lift: 0, flatCard: true }); } continue; }
       const x0 = lerp(-sp / 2, sp / 2, (i + .5) / n);
       piece(curvy([[x0 - kw / 2, y0 - kh / 2], [x0 + kw / 2, y0 - kh / 2], [x0 + kw / 2, y0 + kh / 2], [x0 - kw / 2, y0 + kh / 2]], 1), C.key, { ink: null, key: key + 'k' + r + i, lift: 0, flatCard: true });
     }
@@ -551,7 +556,7 @@ function b2Chair(u, sw, seatY, q, part, key = 'chair') {
 // qL / qR: the 3/4 version where it differs (reaching toward the way it faces). 'idle' swings the arms from o.aL / o.aR.
 const CPPOSE = {
   mimic:   { L: [-1.6, -2.3, .55, 'fist'], R: [2.5, -6.05, .15, 'point', 1], qL: [-1.25, -2.3, .5, 'fist'], qR: [2.85, -5.7, .12, 'point', 1] },
-  typing:  { L: [-.78, -2.72, .45, 'relax', 1, 1.8], R: [.78, -2.72, .45, 'relax', 1, 1.34], qL: [1.3, -2.66, .35, 'relax', 1, 1.25], qR: [2.25, -2.78, .3, 'relax', 0, 1.2] },
+  typing:  { L: [-.78, -2.72, .45, 'keys', 1, 1.8], R: [.78, -2.72, .45, 'keys', 1, 1.34], qL: [1.3, -2.66, .35, 'keys', 1, 1.25], qR: [2.25, -2.78, .3, 'keys', 0, 1.2] },
   present: { L: [-.86, -3.0, .5, 'hold', 1], R: [.86, -3.0, .5, 'hold', 1], qL: [1.45, -3.1, .4, 'hold', 1], qR: [2.8, -3.22, .3, 'hold', 0] },
   wave:    { L: [-1.95, -1.6, .2, 'relax'], R: [2.4, -6.35, .25, 'open', 1] },
   sit:     { L: [-.72, -1.55, .35, 'relax', 1, 1.75], R: [.72, -1.55, .35, 'relax', 1, 1.4], qL: [1.2, -1.5, .3, 'relax', 1, .6], qR: [1.8, -1.6, .3, 'relax', 0, .6] },
@@ -580,7 +585,7 @@ function copilot(x, y, u, o = {}) {
   rs('shadow'); if (!o.noShadow) paint(oval(x, y + .1 * u, (seated ? 2.5 : 1.9) * u, .32 * u, 0, 24), { wash: NOIR.ink, washOp: STYLE.card ? 110 : 150, ink: null });
   push(); translate(x, y + dy); nudge('cp' + id, 1); if (o.rot || G.rot) rotate((o.rot || 0) + G.rot); scale((flip ? -1 : 1) * (1 + sq * .5), 1 - sq);
   const prevXF = XF; XF = flip ? -XF : XF;
-  const Mc = b2Mat();
+  const Mc = b2Mat(), XFc = XF;
   const seatY = -(o.seatH ?? 3.3), dS = seated ? seatY + 1.02 : 0;
   const hipY = -1.5, bob = B.up * .42, lean = B.lean, bsq = cardSq(B.sq), bx = q ? -.1 : 0;
   const UB = p => { const px = p[0] * (1 + bsq * .5), py = (p[1] - hipY) * (1 - bsq), c = Math.cos(lean), s = Math.sin(lean); return [px * c - py * s, hipY + dS - bob + px * s + py * c]; };
@@ -595,7 +600,7 @@ function copilot(x, y, u, o = {}) {
     sp = [...sp];
     if (!pose) { const lag = B.lag; sp[0] += s * .1 * lag; sp[1] += .26 * lag; sp[2] += .1 * lag; }
     if (poseName === 'wave' && s > 0) { sp[0] += .4 * Math.sin(B.clk * TAU); sp[1] += .12 * Math.cos(B.clk * TAU); }
-    if (poseName === 'typing') sp[1] -= .16 * Math.max(0, Math.sin(tt * TAU * 5.5 + (s > 0 ? Math.PI : 0)));
+    if (poseName === 'typing') sp[1] -= .05 * Math.max(0, Math.sin(tt * TAU * 5.5 + (s > 0 ? Math.PI : 0)));   // (the fingers do the typing: o.tap)
     if (poseName === 'cheer') sp[0] += s * .15 * Math.sin(B.clk * TAU);
     return sp;
   };
@@ -608,7 +613,7 @@ function copilot(x, y, u, o = {}) {
   };
   const armHand = A => {
     let hold = A.s > 0 ? o.hold : o.holdL;
-    const p = b2ArmHand(A, { u, sw, hs, key: 'cp' + A.s, hold });
+    const p = b2ArmHand(A, { u, sw, hs, key: 'cp' + A.s, hold, tap: o.tap ?? (poseName === 'typing' ? tt * 12 : null) });
     out.hands[A.s < 0 ? 'L' : 'R'] = p && b2To(M0, p);
   };
   const isFront = s => !!spec(s)[4];
@@ -760,6 +765,8 @@ function copilot(x, y, u, o = {}) {
     }
     fronts.forEach(armHand);
   });
+  // (o.late: those front arms queued to be drawn again, in place, where the shot calls them: over what the hands lie on)
+  if (o.late) for (const s of [-1, 1]) if (o.late[s < 0 ? 'L' : 'R'] && isFront(s)) o.late.out.push(() => { push(); b2At(Mc); const xf = XF; XF = XFc; inUB(() => armHand(armLimb(s))); XF = xf; pop(); });
   XF = prevXF;
   pop();
   rs('emote'); if (o.emote) emote(o.emote, x + (flip ? -1 : 1) * 2.4 * u, y + dy - (8.9 - dS) * u * (1 - sq), u * .5, o.emoteK ?? 1, o.emoteAge ?? T);

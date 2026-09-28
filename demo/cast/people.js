@@ -10,6 +10,12 @@
 //   noShadow · col: colour overrides · idle (0..1, default 1: the idle life, clawd.js lifeOf: breathing lifts the
 //   shoulders and head, the weight shifts from foot to foot, the head turns a little now and then, irregular blinks; never
 //   on the beat. 0 when a shot draws over the rig with personFrame, so the overlay stays put) · blink (force: 1 shut, 0 open)
+//   · late: { L, R: 'arm' | 'hand', out: [] }: those arms are drawn as usual and also queued in out as closures that draw
+//   them again, in place, wherever the shot calls them: after what the hand lies on or grips (a desk top, a box), so the hand
+//   (and forearm) come in front of it while the rest keeps its depth. 'arm': the whole arm, 'hand': just the hand (round
+//   the far side of a box: the wrist and cuff stay behind it).
+//   Call them inside the same look; wrap them in a clip to bring only part of the arm forward · tap: the typing clock for
+//   the 'keys' hand (style.js hand(): one finger presses each whole number; pass it stepped, on twos)
 // personFrame(P, o) returns the skeleton in body units (ya ankle, yh hip, ys shoulder line, yc chin, hy head centre,
 // top, hx head x); multiply by u and add (x, y) for world points (ignores dy, sq, walk bob).
 //
@@ -163,13 +169,31 @@ function ppReach(root, tip, L, bend, s, dir) {
 // less as the arm straightens toward full reach (V2b's reach to the terminal: a straight arm swinging up, its elbow
 // bumped up over it).
 const PP_ARC = { front: [23, -157], far: [53, -157, .6], near: [35, -147] }, PP_RAMP = 5;
+// The end of a limb() through P without drawing it (a late redraw of just the hand): its tip and the angle there.
+function ppLimbTip(P) {
+  if (STYLE.card) return { tip: P[2], ang: Math.atan2(P[2][1] - P[1][1], P[2][0] - P[1][0]) };
+  const C = through(P, 10), e = C[C.length - 1], p = C[C.length - 2];
+  return { tip: e, ang: Math.atan2(e[1] - p[1], e[0] - p[0]) };
+}
+// The current model transform as a 2D affine [a, b, c, d, e, f], and ppAt(M): multiply the current one by what takes it to
+// M, so drawing continues in M's frame wherever it's called from (a rig's late redraws).
+function ppMat() {
+  try { const m = p5.instance._renderer.states.uModelMatrix.mat4; return [m[0], m[1], m[4], m[5], m[12], m[13]]; }
+  catch (e) { return [1, 0, 0, 1, 0, 0]; }
+}
+function ppAt(M) {
+  const [a, b, c, d, e, f] = ppMat(), det = a * d - b * c || 1e-9, I = [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det];
+  applyMatrix(I[0] * M[0] + I[2] * M[1], I[1] * M[0] + I[3] * M[1], I[0] * M[2] + I[2] * M[3], I[1] * M[2] + I[3] * M[3], I[0] * M[4] + I[2] * M[5] + I[4], I[1] * M[4] + I[3] * M[5] + I[5]);
+}
 const ppElbowArc = (s, q) => { const [a, b, k] = q ? (s > 0 ? PP_ARC.far : PP_ARC.near) : PP_ARC.front; return { o: q ? (s > 0 ? 1 : -1) : s, a, b, k }; };
 
 // ---------- poses ----------
-// Hand targets: [x, y, bend, hand pose, front (drawn over the body), wrist angle (optional), 'u']. x in shoulder
-// half-widths (L negative); y from the shoulder line: 0..1 = down to the hip line, below 0 = up toward the crown (-1).
-// Targets out of reach straighten the arm toward them, so the same pose fits every build. With 'u' as the 7th field,
+// Hand targets: [x, y, bend, hand pose, front (drawn over the body), wrist angle (optional), 'u', reach (optional)]. x in
+// shoulder half-widths (L negative); y from the shoulder line: 0..1 = down to the hip line, below 0 = up toward the crown
+// (-1). Targets out of reach straighten the arm toward them, so the same pose fits every build. With 'u' as the 7th field,
 // x and y are body units in the person's own frame (ground point = 0, before the flip): for touching another character.
+// reach (default 1): the arm drawn at that fraction of its length, foreshortened (an arm reaching toward us or away: seated
+// typing, the elbows back at her sides and the forearms coming forward over the desk); pPoses blends it.
 const PPOSE = {
   idle:    { L: [-1.35, 3, .1, 'relax'], R: [1.35, 3, .1, 'relax'] },
   low:     { L: [-1.1, 3, .06, 'relax'], R: [1.1, 3, .06, 'relax'] },
@@ -195,7 +219,9 @@ function pPoses(t, keys, blend = .3) {
   const get = v => typeof v === 'string' ? PPOSE[v] : v, cur = get(keys[i][1]); if (i === 0) return cur;
   const prev = get(keys[i - 1][1]), k = backOut(seg(t, keys[i][0], keys[i][0] + blend));
   const ang = (a, b) => a == null || b == null ? (k < .5 ? a : b) : lerp(a, b, k);
-  const mix = (a, b) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k), k < .5 ? a[3] : b[3], k < .5 ? a[4] : b[4], ang(a[5], b[5])];
+  const mix = (a, b) => { const m = [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k), k < .5 ? a[3] : b[3], k < .5 ? a[4] : b[4], ang(a[5], b[5])];
+    if (a[7] != null || b[7] != null) m[7] = lerp(a[7] ?? 1, b[7] ?? 1, k);   // (the reach; the 'u' flag at [6] is dropped, as ever)
+    return m; };
   return { L: mix(prev.L, cur.L), R: mix(prev.R, cur.R) };
 }
 
@@ -244,6 +270,7 @@ function person(x, y, u, P, o = {}) {
   rs('shadow'); if (!o.seated && !o.noShadow) paint(oval(x + QS * u, y + .1 * u, (Math.max(hem0[0], b.legGap + b.foot) + .7) * u, .42 * u, 0, 24), { wash: NOIR.ink, washOp: STYLE.card ? 110 : 150, ink: null });
   push(); translate(x, y + (o.dy || 0) * 1.1 * u); nudge('pp' + K, 1); if (rot) rotate(rot); scale((o.flip ? -1 : 1) * (1 + sq * .5), 1 - sq);
   const prevXF = XF; XF = o.flip ? -XF : XF;
+  const M0 = o.late ? ppMat() : null, XF0 = XF;   // (the rig's frame, for the late redraws)
 
   // ---- the coat's silhouette: a right-hand profile, mirrored; in 3/4 the far side narrows and a stoop hunches it ----
   const seatCut = o.seated ? b.torso + .7 : Infinity;
@@ -266,20 +293,23 @@ function person(x, y, u, P, o = {}) {
   const pose = o.pose ? (typeof o.pose === 'object' ? o.pose : PPOSE[o.pose]) : walking ? null : PPOSE.idle;
   // hand targets hold still while the shoulders breathe (so a prop placed from personFrame stays in the hand)
   const ys0 = ys + br, top0 = top + br, target = spec => spec[6] === 'u' ? [spec[0], spec[1]] : [spec[0] * shX + QS + lean(ys), spec[1] >= 0 ? ys0 + spec[1] * (yh - ys0) : ys0 + spec[1] * (ys0 - top0)];
-  const arm = (s, front) => {
+  // (only: a late redraw, o.late: 'arm' the whole arm whichever layer it was in, 'hand' the hand alone)
+  const arm = (s, front, only) => {
     let spec = pose ? (s < 0 ? pose.L : pose.R) : null, swing = null;
     if (!spec) { swing = Math.sin(wph + (s < 0 ? 0 : Math.PI)) * (q ? .42 : .12) + (q ? 0 : s * .12); spec = [0, 0, .1, 'relax', q && s < 0 ? 1 : 0]; }
     const isFront = !!(spec[4] || (tp.armsFront !== false && !(q && s > 0)));   // hanging arms go over wide coats; in 3/4 the far arm stays behind
-    if (isFront !== front) return;
+    if (!only && isFront !== front) return;
     rs('arm' + s);
+    front = isFront;
     const far = q && s > 0 && !front, inset = front ? aw * .42 : aw * .85;
     const root = [xq(s * (shX - inset), shY), shY + aw * .4];
     const tip = swing != null ? [root[0] + Math.sin(swing) * L, root[1] + Math.cos(swing) * L] : target(spec);
-    const pts = ppReach(root, tip, L, spec[2] ?? .1, s, ppElbowArc(s, q));
+    const pts = ppReach(root, tip, L * (spec[7] ?? 1), spec[2] ?? .1, s, ppElbowArc(s, q));
     const col = far ? mixCol(C.coat, C.coatDk, .45) : C.coat;
-    const r = limb(S(pts), aw * u, b.wrist * u, col, { sw, shade: C.coatDk, key: k('arm' + s) });
+    const r = only === 'hand' ? ppLimbTip(S(pts)) : limb(S(pts), aw * u, b.wrist * u, col, { sw, shade: C.coatDk, key: k('arm' + s) });
     const ca = spec[5] ?? r.ang, cw = b.wrist * 1.12;
-    if (spec[3] !== 'none') hand(r.tip[0] + Math.cos(ca) * .08 * u, r.tip[1] + Math.sin(ca) * .08 * u, ca, b.hand * u, { pose: spec[3], col: far ? C.skinDk : C.skin, sw, mirror: s < 0, key: k('h' + s), hold: s > 0 ? o.hold : o.holdL, maxTone: .45 });
+    if (spec[3] !== 'none') hand(r.tip[0] + Math.cos(ca) * .08 * u, r.tip[1] + Math.sin(ca) * .08 * u, ca, b.hand * u, { pose: spec[3], col: far ? C.skinDk : C.skin, sw, mirror: s < 0, key: k('h' + s), hold: s > 0 ? o.hold : o.holdL, maxTone: .45, tap: o.tap });
+    if (only === 'hand') return;   // (a hand coming round the far side of what it grips: its cuff stays behind)
     const ex0 = [r.tip[0] - Math.cos(r.ang) * .32 * u, r.tip[1] - Math.sin(r.ang) * .32 * u];
     piece(ppBar(ex0, [r.tip[0] + Math.cos(r.ang) * .04 * u, r.tip[1] + Math.sin(r.ang) * .04 * u], cw * u, cw * 1.04 * u), far ? mixCol(C.cuff || C.coatDk, NOIR.ink, .15) : (C.cuff || C.coatDk), { sw, key: k('cuff' + s), lift: 2 });
   };
@@ -676,6 +706,7 @@ function person(x, y, u, P, o = {}) {
 
   // ---- arms in front of the body ----
   arm(-1, true); arm(1, true);
+  if (o.late) for (const s of [-1, 1]) { const m = o.late[s < 0 ? 'L' : 'R']; if (m) o.late.out.push(() => { push(); ppAt(M0); const xf = XF; XF = XF0; arm(s, true, m); XF = xf; pop(); }); }
   XF = prevXF;
   pop();
   rs('emote'); if (o.emote) emote(o.emote, x + (o.flip ? -1 : 1) * (hw + 1.2) * u, y + (o.dy || 0) * 1.1 * u + (top - (hairStyle === 'bun' ? .6 * bunR : 0) - .8) * u * (1 - sq), u * .62, o.emoteK ?? 1, o.emoteAge ?? T);

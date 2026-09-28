@@ -80,6 +80,9 @@ const OFFICE = {
   clock: [1296, 222, 56],                              // [cx, cy, r]
   win: { x0: 170, y0: 140, x1: 1170, y1: 620 },
   deskTop: { x0: 430, x1: 1010, far: 712, front: 742, y: 727 },   // the desk top (y: where things sit on it)
+  // her keyboard, real size against her hands (a little wider than her shoulders), in front of her chair: x0..x1 at its far
+  // edge (her side: the space bar row), far and front (y); seen from beyond it, so its rows run space bar → number row down
+  kbd: { x0: 634, x1: 746, far: 719, front: 731 },
   screen: [[794, 562], [934, 575], [934, 693], [794, 680]],        // the monitor's screen [tl, tr, br, bl] (a parallelogram)
   // the copier: x0..x1, top = the platen's front edge, hinge = the lid's hinge line (the platen's back edge), glass = the
   // platen quad, out = the mouth of the output bay (copies slide out of it to the left), lidTop(k) = the open lid's top y
@@ -475,10 +478,15 @@ function officeFront(t, lt, o = {}) {
   piece([[D.x0 + 110, Dy - 6], [D.x0 + 190, Dy - 10], [D.x0 + 196, Dy + 6], [D.x0 + 112, Dy + 10]], PRO.paper, { sw: 1, key: 'pro-paper1', lift: 1.5, flatCard: true });
   prScrib(D.x0 + 124, Dy - 1, 54, .8, PRO.paperDk, .8, 1);
   prMonitor(t, lt, o);
-  // keyboard and mouse
-  const kx = 612, kw = 158;
-  piece([[kx + 6, Dy - 8], [kx + kw - 6, Dy - 8], [kx + kw, Dy + 8], [kx, Dy + 8]], PRO.key, { sw: 1.2, key: 'pro-kb', lift: 2, flatCard: true });
-  for (let r = 0; r < 3; r++) for (let c = 0; c < 12; c++) { const y = Dy - 5 + r * 4.4, x = kx + 10 + c * 11.6 + r * 2; prFlat(prR(x, y, x + 8, y + 3), PRO.keyLt, 'pro-k' + r + '_' + c); }
+  // keyboard and mouse (the keyboard real size against her hands: OFFICE.kbd; rows of small keys, the space bar on her side,
+  // the rows widening a touch toward us)
+  const K = OFFICE.kbd, kp = (u, v) => [lerp(lerp(K.x0 + 3, K.x1 - 3, u), lerp(K.x0, K.x1, u), v), lerp(K.far, K.front, v)];
+  piece([kp(0, 0), kp(1, 0), kp(1, 1), kp(0, 1)], PRO.key, { sw: 1.1, key: 'pro-kb', lift: 2, flatCard: true });
+  for (let r = 0; r < 3; r++) {
+    const v0 = .12 + r * .29, v1 = v0 + .2, n = 18, key = (u0, u1, id) => prFlat([kp(u0, v0), kp(u1, v0), kp(u1, v1), kp(u0, v1)], PRO.keyLt, 'pro-k' + r + '_' + id);
+    if (r === 0) { key(.05, .15, 'a'); key(.18, .7, 'sp'); key(.73, .83, 'b'); key(.86, .95, 'c'); continue; }   // (her side: the space bar)
+    for (let c = 0; c < n; c++) { const u0 = .05 + c * .9 / n + (r === 1 ? .012 : 0); key(u0, u0 + .9 / n * .72, c); }
+  }
   prOn(oval(806, Dy + 2, 26, 8, 0, 18), '#4E6A84', 'pro-mmat', { lift: .8 });
   piece(oval(806, Dy - 1, 8, 6, 0, 14), PRO.keyLt, { sw: 1, key: 'pro-mouse', lift: 2, flatCard: true });
   // the in-tray on the right: a wire tray with a stack
