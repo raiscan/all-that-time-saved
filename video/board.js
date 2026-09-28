@@ -192,7 +192,7 @@ const BOARD = [
 
   // ---------------- OUTRO (bars 161–end, him): the rhyme ----------------
   { id: 'O1', bar: [161, 165], sec: 'Outro', look: 'ink>card', who: 'the 1930s ad',
-    what: '"All that time saved." The 1930s ad from the intro, frozen and draining to grey (the promise). "None of it mine." The camera pulls back slowly: the ad is playing on a phone propped on its case\'s kickstand on the stopped night train\'s table, beside her notebook open at the unrealised Friday drawing, her hand resting on the page: the promise and what they actually wanted, side by side. Hold. Black.',
+    what: '"All that time saved." The 1930s ad from the intro, frozen and draining to grey (the promise). "None of it mine." The camera pulls back slowly: the ad is playing on a phone lying flat on the stopped night train\'s table, beside her notebook open at the unrealised Friday drawing, her hand resting on the page: the promise and what they actually wanted, side by side. Hold. Black.',
     in: 'cut on the downbeat (the spoken lines are kept)', scene: 'pastEnd' },
 
   // ---------------- END CREDITS (after the song: from its end, DUR, to the film's, FILM_END) ----------------

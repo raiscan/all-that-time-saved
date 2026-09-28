@@ -1,7 +1,7 @@
 // outro.js: O1 (bar 161 to the end). The rhyme with the intro, then the person who believed it.
 //   "All that time saved."  the 1930s ad from the intro, frozen and draining to grey: the promise, stalled
 //   "None of it mine."      on the downbeat, pull back: the ad is playing on a phone, landscape, propped on its case's
-//                           kickstand on the stopped night train's table, beside her notebook open at the Friday they drew
+//                           the stopped night train's table, beside her notebook open at the Friday they drew
 //                           (the unrealised future), her hand resting on the page. Hold (alive: her fingers settle, her
 //                           thumb strokes the page once, a train's lights pass on the next line). Black.
 (() => {
@@ -16,7 +16,7 @@
   // canonical size (animation-style.md: A4 landscape, about twice her phone's length, 1.7 of her hand's): the page
   // 830 wide against the phone's 424 and her hand's ~490 (it had been 1100, near A3, and four of her hand's lengths)
   const PG = { cx: 975, cy: 450, w: 830, rot: -.035 }; PG.h = PG.w * 9 / 16; PG.s = PG.w / W;
-  // the phone: landscape, propped on its case's kickstand on the table left of the notebook; SCR = its screen (16:9)
+  // the phone: landscape, lying flat on the table left of the notebook; SCR = its screen (16:9)
   const SCR = { x0: 58, y0: 330, w: 384 }; SCR.h = SCR.w * 9 / 16; SCR.cx = SCR.x0 + SCR.w / 2; SCR.cy = SCR.y0 + SCR.h / 2;
   const PULL = [CUT, CUT + 3.1];   // the pull-back from the screen (filling the frame) to the whole table: slow, revealing the notebook
   const onPG = ([x, y]) => { const c = Math.cos(PG.rot), s = Math.sin(PG.rot); return [PG.cx + x * c - y * s, PG.cy + x * s + y * c]; };   // page-centred → world
@@ -73,7 +73,7 @@
       const [x, y] = onPG([-PG.w / 2 - .0085 * PG.w, -PG.h / 2 + .034 * PG.w + i * (PG.h - .068 * PG.w) / 8]);
       piece(oval(x, y, .0385 * PG.w, .019 * PG.w, PG.rot, 14), NBK.coil, { sw: 1.2, key: 'ring' + i, lift: 3, flatCard: true });
     }
-    // 2b. the phone on its kickstand, the old ad playing on it
+    // 2b. the phone lying flat, the old ad playing on it
     const fade = ease(seg(k, 5.3, 7.2));   // (the fade to black: a grade on the whole frame and on the phone's screen alike)
     phone(t, toS, fade);
     // 3. her hand (her tomato coat's sleeve from the right), resting on the page's lower right corner, on their Friday; two
@@ -93,13 +93,12 @@
   }
   const HAND = { x: 1705, y: 792, rot: .22, s: 255 };   // her wrist (world px, before the settle) and the hand's turn and size
 
-  // The phone (card), landscape, standing on the table on its case's kickstand, the old ad playing on it (the ink look,
+  // The phone (card), landscape, lying flat on the table in its case (seen from above: a kickstand stuck out under it as a
+  // stray tab, the user), the old ad playing on it (the ink look,
   // frozen and grey: its grade applies to the screen only, POSTFX_AREAS). toS maps a point here to the screen.
   function phone(t, toS, fade = 0) {
     const { x0, y0, w, h } = SCR, b = 13, cz = 7;   // the bezel, the case's lip
     boilSeed('phone');
-    piece([[x0 + 40, y0 + h + b + 4], [x0 + w + 60, y0 + h + b + 4], [x0 + w + 130, y0 + h + b + 46], [x0 + 100, y0 + h + b + 46]], '#000000', { ink: null, op: 60, key: 'phshadow', lift: 0, flatCard: true, edge: false });   // its shadow on the table
-    piece([[x0 + w - 70, y0 + h - 10], [x0 + w - 44, y0 + h - 16], [x0 + w + 6, y0 + h + b + 30], [x0 + w - 20, y0 + h + b + 34]], '#4A5A48', { sw: 1.2, key: 'phstand', lift: 2 });   // the kickstand, behind
     piece(prRound(x0 - b - cz, y0 - b - cz, x0 + w + b + cz, y0 + h + b + cz, 26), '#7A9278', { sw: 1.6, shade: '#5A7058', depth: 8, key: 'phcase', lift: 6 });   // the case (sage)
     piece(prRound(x0 - b, y0 - b, x0 + w + b, y0 + h + b, 20), '#1E1C24', { sw: 1.2, key: 'phbody', lift: 2, flatCard: true });   // the phone
     clipPoly(oR4(x0, y0, x0 + w, y0 + h), () => { push(); translate(x0, y0); scale(w / W); adPicture(t); pop(); });   // the screen: the ad

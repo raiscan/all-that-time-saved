@@ -1030,6 +1030,42 @@
    "alignScore": 0.26
   },
   {
+   "start": 72.82,
+   "end": 73.4,
+   "text": "Ooh",
+   "section": "Chorus",
+   "singer": "F",
+   "backing": true,
+   "words": [
+    [
+     72.82,
+     73.4
+    ]
+   ],
+   "voice": "F",
+   "heard": true,
+   "pitch": 460.1,
+   "voiceConf": 2.09
+  },
+  {
+   "start": 74.4,
+   "end": 75.12,
+   "text": "Oooh",
+   "section": "Chorus",
+   "singer": "F",
+   "backing": true,
+   "words": [
+    [
+     74.4,
+     75.12
+    ]
+   ],
+   "voice": "F",
+   "heard": true,
+   "pitch": 348.7,
+   "voiceConf": 2.21
+  },
+  {
    "start": 75.169,
    "end": 78.07,
    "text": "Same shit, faster. What a fucking thrill.",
@@ -2005,7 +2041,7 @@
   },
   {
    "start": 135.608,
-   "end": 139.813,
+   "end": 138.08,
    "text": "Less pay? Get fucked!",
    "section": "Pre-Chorus",
    "singer": "F",
@@ -2026,35 +2062,33 @@
     ],
     [
      137.751,
-     139.813
+     138.08
     ]
    ],
-   "pitch": 310.7,
+   "pitch": 265.1,
    "voice": "F",
-   "voiceConf": 2.71,
+   "voiceConf": 3.31,
    "asrStart": 134.78,
    "asrEnd": 137.94,
    "alignScore": 0.625
   },
   {
-   "start": 140.093,
-   "end": 140.254,
-   "text": "Oh",
+   "start": 138.48,
+   "end": 139.5,
+   "text": "Oooh",
    "section": "Pre-Chorus",
    "singer": "F",
    "backing": true,
    "words": [
     [
-     140.093,
-     140.254
+     138.48,
+     139.5
     ]
    ],
-   "pitch": null,
-   "voice": null,
-   "voiceConf": null,
-   "asrStart": 137.94,
-   "asrEnd": 139.28,
-   "alignScore": 0.216
+   "voice": "F",
+   "heard": true,
+   "pitch": 391.4,
+   "voiceConf": 1.74
   },
   {
    "start": 139.502,
@@ -2220,6 +2254,24 @@
    "alignScore": 0.317
   },
   {
+   "start": 146.95,
+   "end": 147.66,
+   "text": "Ooh",
+   "section": "Chorus",
+   "singer": "F",
+   "backing": true,
+   "words": [
+    [
+     146.95,
+     147.66
+    ]
+   ],
+   "voice": "F",
+   "heard": true,
+   "pitch": 431.8,
+   "voiceConf": 1.88
+  },
+  {
    "start": 148.727,
    "end": 149.068,
    "text": "Oooh",
@@ -2278,11 +2330,21 @@
     ]
    ],
    "pitch": 288.2,
-   "voice": "F",
-   "voiceConf": 2.78,
+   "voice": "M",
+   "voiceConf": null,
    "asrStart": 148.38,
    "asrEnd": 152.2,
-   "alignScore": 0.242
+   "alignScore": 0.242,
+   "heard": true,
+   "wordVoice": [
+    "F",
+    "F",
+    "F",
+    "M",
+    "M",
+    "M",
+    "M"
+   ]
   },
   {
    "start": 152.35,

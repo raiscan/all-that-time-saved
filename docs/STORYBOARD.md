@@ -307,7 +307,8 @@ A longer bunker banquet (more bosses), in the same note border; the slot spits a
 
 *In:* cut
 
-> F: Same shit, faster. What a fucking thrill.
+> F: Same shit, faster.  
+> M: What a fucking thrill.
 
 **C2e** · bars 85–87 · 2:31.8–2:35.3 (3.5 s) · riso (bad future) → card (present) · bots; Tess, Rowan
 
@@ -485,7 +486,7 @@ The same scene at the table. "I can't escape the rent": on "rent" the landlord's
 
 **O1** · bars 161–165 · 4:47.2–4:59.4 (12.2 s) · rubber hose (past) → card (present) · the 1930s ad · concept scene: `pastEnd`
 
-"All that time saved." The 1930s ad from the intro, frozen and draining to grey (the promise). "None of it mine." The camera pulls back slowly: the ad is playing on a phone propped on its case's kickstand on the stopped night train's table, beside her notebook open at the unrealised Friday drawing, her hand resting on the page: the promise and what they actually wanted, side by side. Hold. Black.
+"All that time saved." The 1930s ad from the intro, frozen and draining to grey (the promise). "None of it mine." The camera pulls back slowly: the ad is playing on a phone lying flat on the stopped night train's table, beside her notebook open at the unrealised Friday drawing, her hand resting on the page: the promise and what they actually wanted, side by side. Hold. Black.
 
 *In:* cut on the downbeat (the spoken lines are kept)
 

@@ -28,7 +28,7 @@ Less pay? Get fucked.
 [Chorus - bright melody, bitter female lead, sweet backing harmonies]
 Fully automated - taking the piss! (Taking the piss!)
 All that intelligence, and we get this?
-You get the bunker; I get the bill.
+You get the bunker; (Ooh) I get the bill. (Oooh)
 Same shit, faster. What a fucking thrill. (What a thrill!)
 Your bots escaped the sandbox;
 I can't escape the rent.
@@ -57,12 +57,12 @@ Here's a prompt. No jailbreak. No elaborate attack:
 
 [Pre-Chorus - forceful - Female Singer]
 Less work? Lovely.
-Less pay? Get fucked! (Oh)
+Less pay? Get fucked! (Oooh)
 
 [Chorus - Female Singer]
 Fully automated - taking the piss! (Taking the piss!)
 All that intelligence, and we get this?
-You get the bunker; I get the bill. (Oooh)
+You get the bunker; (Ooh) I get the bill. (Oooh)
 Same shit, faster. What a fucking thrill. (What a thrill!)
 Your bots escaped the sandbox;
 I can't escape the rent.
