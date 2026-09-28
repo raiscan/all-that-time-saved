@@ -396,7 +396,7 @@
       look('doodle'); boilSeed('flip page'); linedPaper(); look('card');
       push(); translate(960, 540 - 30 * Math.sin(q * Math.PI)); scale(sx * (1 + .06 * Math.sin(q * Math.PI)), 1 + .06 * Math.sin(q * Math.PI)); translate(-960, -540);
       if (c > 0) { push(); translate(960, 540); lifeCardFront(W); pop(); }
-      else clipPoly(b2RoundPoly(rect(0, 0, W, H), 20), () => { look('doodle'); linedPaper(); hammockScene(tt, { k, st: { palm3: [0, 0], sling2: [0, 0], him: [0, 0] }, her: herHammock(99, 0, 0, 0, 0), sun: 'o' }); });   // (the card's back, its shape: the paper runs 60 px past it)
+      else clipPoly(b2RoundPoly(rect(0, 0, W, H), 20), () => { look('doodle'); linedPaper(); hammockScene(tt, { k, st: { palm3: [0, 0], sling2: [0, 0], him: [0, 0] }, her: herHammock(99, 0, 0, 0, k), sun: 'o' }); });   // (the card's back, its shape: the paper runs 60 px past it)
       pop();
       return;
     }
