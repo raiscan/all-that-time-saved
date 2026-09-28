@@ -1,6 +1,6 @@
 // outro.js: O1 (bar 161 to the end). The rhyme with the intro, then the person who believed it.
 //   "All that time saved."  the 1930s ad from the intro, frozen and draining to grey: the promise, stalled
-//   "None of it mine."      on the downbeat, pull back: the ad is playing on a phone, landscape, propped on its case's
+//   "None of it mine."      on the downbeat, pull back: the ad is playing on a phone, landscape, lying flat on
 //                           the stopped night train's table, beside her notebook open at the Friday they drew
 //                           (the unrealised future), her hand resting on the page. Hold (alive: her fingers settle, her
 //                           thumb strokes the page once, a train's lights pass on the next line). Black.
