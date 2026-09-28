@@ -308,7 +308,9 @@ function person(x, y, u, P, o = {}) {
     const col = far ? mixCol(C.coat, C.coatDk, .45) : C.coat;
     const r = only === 'hand' ? ppLimbTip(S(pts)) : limb(S(pts), aw * u, b.wrist * u, col, { sw, shade: C.coatDk, key: k('arm' + s) });
     const ca = spec[5] ?? r.ang, cw = b.wrist * 1.12;
-    if (spec[3] !== 'none') hand(r.tip[0] + Math.cos(ca) * .08 * u, r.tip[1] + Math.sin(ca) * .08 * u, ca, b.hand * u, { pose: spec[3], col: far ? C.skinDk : C.skin, sw, mirror: s < 0, key: k('h' + s), hold: s > 0 ? o.hold : o.holdL, maxTone: .45, tap: o.tap });
+    // (a hand pose ending in '^' has its thumb on the other side: a box held by its ends, the thumbs over its top)
+    const hp = spec[3], thF = typeof hp === 'string' && hp.endsWith('^');
+    if (hp !== 'none') hand(r.tip[0] + Math.cos(ca) * .08 * u, r.tip[1] + Math.sin(ca) * .08 * u, ca, b.hand * u, { pose: thF ? hp.slice(0, -1) : hp, col: far ? C.skinDk : C.skin, sw, mirror: (s < 0) !== thF, key: k('h' + s), hold: s > 0 ? o.hold : o.holdL, maxTone: .45, tap: o.tap });
     if (only === 'hand') return;   // (a hand coming round the far side of what it grips: its cuff stays behind)
     const ex0 = [r.tip[0] - Math.cos(r.ang) * .32 * u, r.tip[1] - Math.sin(r.ang) * .32 * u];
     piece(ppBar(ex0, [r.tip[0] + Math.cos(r.ang) * .04 * u, r.tip[1] + Math.sin(r.ang) * .04 * u], cw * u, cw * 1.04 * u), far ? mixCol(C.cuff || C.coatDk, NOIR.ink, .15) : (C.cuff || C.coatDk), { sw, key: k('cuff' + s), lift: 2 });
