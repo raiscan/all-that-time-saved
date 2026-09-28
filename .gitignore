@@ -3,3 +3,6 @@ out/
 .venv/
 __pycache__/
 bun.lock
+
+# lossless audio masters (57 MB each; the mp3s in assets/ are what the repo ships; the final mixes use these when present)
+assets/lossless/

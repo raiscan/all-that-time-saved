@@ -24,6 +24,8 @@ import subprocess, tempfile, os
 import numpy as np, soundfile as sf
 
 SRC, OUT, LEN = 'assets/instrumental.mp3', 'assets/credits_bed.mp3', 66.48
+LOSSLESS = 'assets/lossless/instrumental.wav'   # (the Suno WAV, sample-aligned with the mp3: cut from it when it's here, and a
+if os.path.exists(LOSSLESS): SRC = LOSSLESS      # lossless bed written beside it for the final mixes)
 INST = [(229.0496, 261.3027), (233.0536, 255.9556), (287.7078, None)]   # instrumental times (s): the three stretches as first cut
 NOTE4, BEAT = 290.285, 60 / 136.022          # the coda's fourth note (its phrase); the instrumental's beat
 XF = 4 * BEAT                                 # the bar-long crossfade into the coda
@@ -52,5 +54,6 @@ with tempfile.TemporaryDirectory() as d:
     f = int(.01 * SR); out[:f] *= np.linspace(0, 1, f)[:, None]
     f = int(.05 * SR); out[-f:] *= np.linspace(1, 0, f)[:, None]
     bed = os.path.join(d, 'bed.wav'); sf.write(bed, out, SR, subtype='FLOAT')
+    if SRC == LOSSLESS: sf.write('assets/lossless/credits_bed.wav', out, SR, subtype='PCM_24')
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', bed, '-c:a', 'libmp3lame', '-b:a', '256k', OUT], check=True)
 print(OUT, f'{LEN} s')

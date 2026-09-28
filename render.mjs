@@ -21,7 +21,8 @@
 //   runs short. --audio=<file> instead puts one file under the whole film from 0. A span's end may be 'end' (--clip=292:end).
 //   Other flags: --fps=24,
 //   --chrome=<path to Chrome/Chromium>, --page=<another studio page, e.g. video/dev-verse1.html>,
-//   --encode --youtube: the upload master (YouTube's recommended settings for 4K SDR: see the encode). --jq=Q: the frames'
+//   --encode --youtube: the upload master (YouTube's recommended settings for 4K SDR: see the encode); --out=<name>.mov
+//   gives it uncompressed 24-bit PCM sound (from assets/lossless/ when present), YouTube's only lossy audio step its own. --jq=Q: the frames'
 //   JPEG quality (default .94; the final masters .97).
 //   --os=2 (output 3840x2160: 4K), --query=k=v&k2=v2 (extra page parameters, e.g. z3=b: docs/SWITCHES.md), --ss=N (supersample: draw at Nx and average each N×N block down to one pixel, for anti-aliased edges and fine lines; --clip and --frames default to 2).
 //   Sheets and strips draw at 1x unless given --ss: there a line under a pixel wide prints as dashes (the banknote's fine
@@ -59,15 +60,20 @@ const fields = s => { const out = []; let d = 0, cur = ''; for (const ch of Stri
 // its inputs after the video's (input 0) and map the video and the sound. P: the page's PROJECT. The song plays to
 // P.duration (padded with silence or cut there), the credits' music from there for P.credits.len; --audio=<file>
 // replaces both with one file from 0. Nothing to play: [].
+// (the lossless masters, when they're here: assets/lossless/<name>.wav for assets/<name>.mp3, sample-aligned with it; not
+// in the repo, 57 MB each. The mp3s are what ships.)
+const lossless = f => { if (!f) return f; const w = f.replace(/^assets\/([^/]+)\.mp3$/, 'assets/lossless/$1.wav'); return w !== f && existsSync(w) ? w : f; };
 function soundArgs(P, a, n) {
-  const b = a + n / fps, song = args.audio || P.audio, cr = !args.audio && P.credits && P.credits.audio && existsSync(P.credits.audio) ? P.credits : null;
+  const b = a + n / fps, song = lossless(args.audio || P.audio), cr0 = !args.audio && P.credits && P.credits.audio && existsSync(P.credits.audio) ? P.credits : null,
+    cr = cr0 && { ...cr0, audio: lossless(cr0.audio) };
   if (!song) return [];
   const norm = 'aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo';
   const whole = args.audio ? `[1:a]${norm},apad[f]`
     : cr ? `[1:a]${norm},apad,atrim=end=${P.duration}[s];[2:a]${norm},apad,atrim=end=${+cr.len}[c];[s][c]concat=n=2:v=0:a=1,apad[f]`
     : `[1:a]${norm},apad,atrim=end=${P.duration}[s];[s]apad[f]`;   // (no credits' music: silence after the song)
+  const mov = /\.mov$/i.test(args.out || '');   // (a .mov takes the sound uncompressed, 24-bit PCM: the upload's only lossy step is YouTube's)
   return ['-i', song, ...(cr ? ['-i', cr.audio] : []), '-filter_complex', `${whole};[f]atrim=start=${a}:end=${b},asetpts=PTS-STARTPTS[snd]`,
-    '-map', '0:v', '-map', '[snd]', '-c:a', 'aac', '-b:a', '192k'];
+    '-map', '0:v', '-map', '[snd]', ...(mov ? ['-c:a', 'pcm_s24le'] : ['-c:a', 'aac', '-b:a', '320k'])];
 }
 const describeSound = P => args.audio ? args.audio : [P.audio, P.credits && P.credits.audio].filter(Boolean).join(' + ');
 
@@ -87,7 +93,7 @@ if (args.encode) {
   const yt = args.youtube ? ['-vf', 'scale=in_color_matrix=bt601:out_color_matrix=bt709:in_range=pc:out_range=tv:flags=accurate_rnd+full_chroma_int+bitexact,format=yuv420p,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv',
     '-c:v', 'libx264', '-preset', 'slow', '-crf', '14', '-profile:v', 'high', '-level:v', '5.1', '-bf', '2', '-g', String(fps / 2), '-keyint_min', String(fps / 2), '-sc_threshold', '0',
     '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv'] : null;
-  const sndYT = args.youtube ? snd.map((v, i) => snd[i - 1] === '-b:a' ? '384k' : v).concat(['-ar', '48000']) : snd;
+  const sndYT = args.youtube ? snd.map((v, i) => snd[i - 1] === '-b:a' ? '384k' : v).concat(['-ar', '48000']) : snd;   // (a .mp4 upload: AAC 384k; a .mov: PCM)
   await run('ffmpeg', ['-y', '-loglevel', 'error', '-stats', '-framerate', String(fps), '-i', `${FRAMES_DIR}/f%05d.jpg`,
     ...sndYT, ...(yt || ['-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-pix_fmt', 'yuv420p']), '-movflags', '+faststart', out]);
   console.log('wrote ' + out);
