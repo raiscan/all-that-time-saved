@@ -215,8 +215,8 @@
   // round the box's near end up close, and reaches out full length for it at the boss's arm's length)
   const HER_SH = (() => { const Fr = personFrame(HER_C, { view: 'q' }), y = Fr.ys + Math.max(HER_C.top.sh[1], .15) + HER_C.body.armW * .4, x = HER_C.top.sh[0] - HER_C.body.armW * .42;
     return { L: [-x * .93 + PP_QS, y], R: [x * .97 + PP_QS, y] }; })();
-  const herGrip = (fx, fb) => { const L = [fx - BOXH - .05, fb - .62], d = Math.hypot(L[0] - HER_SH.L[0], L[1] - HER_SH.L[1]);
-    return { L: [...L, .1, 'hold^', 1, -.2, 'u', clamp(d / (HER_C.body.arm * .9), .66, 1)], R: [fx + BOXH + .05, fb - .62, .15, 'hold^', 1, Math.PI + .2, 'u'] }; };   // (thumbs over the top: the user)
+  const herGrip = (fx, fb) => { const L = [fx - BOXH - .2, fb - 1.5], d = Math.hypot(L[0] - HER_SH.L[0], L[1] - HER_SH.L[1]);
+    return { L: [...L, .1, 'hold^', 1, 1.35, 'u', clamp(d / (HER_C.body.arm * .9), .66, 1)], R: [fx + BOXH + .2, fb - 1.5, .15, 'hold^', 1, 1.7916, 'u'] }; };   // (thumbs over the top: the user)
   const herCarry = () => herGrip(BOXC[0], BOXC[1] + 1.9);
   const herReaches = (spec, s) => { const r = HER_SH[s < 0 ? 'L' : 'R']; return Math.hypot(spec[0] - r[0], spec[1] - r[1]) <= HER_C.body.arm * (spec[7] ?? 1) * .96; };
   const boxAt = (x, y, flip) => [x + (flip ? -1 : 1) * BOXC[0] * HU, y + (BOXC[1] + 1.9) * HU];   // its bottom middle (world)
@@ -338,7 +338,7 @@
       const out = seg(tt, T.repl, T.repl + .9), bx = BOSSS[0] + 520 * ease(out);
       const fwd = day ? ease(seg(tt, T.five + .45, T.we + .1)) : 0, xk = seg(tt, XF0[0], XF0[1]), done = tt >= XF0[1];
       const mood = emotions(tt, [[0, 'neutral', { mouth: 'smile' }], [T.we, 'neutral', { mouth: 'smile', lookX: .3 }], [XF0[1] + .1, 'neutral', { mouth: 'smile', lookX: -.4, lookY: .2 }], [T.repl, 'neutral', { mouth: 'flat', lookX: -.9, lookY: .3 }]], { take: .3 });
-      const hold = (bx2, by2) => ({ L: [bx2 - 2.6, by2 + .2, .35, 'hold^', 1, -.15, 'u'], R: [bx2 + 2.6, by2 + .2, .35, 'hold^', 1, Math.PI + .15, 'u'] });   // (thumbs over the top)
+      const hold = (bx2, by2) => ({ L: [bx2 - 2.75, by2 - .5, .35, 'hold^', 1, 1.35, 'u'], R: [bx2 + 2.75, by2 - .5, .35, 'hold^', 1, 1.7916, 'u'] });   // (thumbs over the top)
       // (he holds it out as he starts to speak, and lower: held up at his chest the plant's leaves crossed his mouth through
       // "We won't be needing you", the line he's lip-syncing)
       const bxu = 2.6 + 1.1 * fwd, byu = -9.0 + .95 * fwd;   // (2.6: at 3.0 the box's far end was past his reach, and his far hand stopped short on its face, detached: the user)
