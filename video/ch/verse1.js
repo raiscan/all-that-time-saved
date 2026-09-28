@@ -341,7 +341,7 @@
       const hold = (bx2, by2) => ({ L: [bx2 - 2.6, by2 + .2, .35, 'hold^', 1, -.15, 'u'], R: [bx2 + 2.6, by2 + .2, .35, 'hold^', 1, Math.PI + .15, 'u'] });   // (thumbs over the top)
       // (he holds it out as he starts to speak, and lower: held up at his chest the plant's leaves crossed his mouth through
       // "We won't be needing you", the line he's lip-syncing)
-      const bxu = 3.0 + 1.1 * fwd, byu = -9.0 + .95 * fwd;
+      const bxu = 2.6 + 1.1 * fwd, byu = -9.0 + .95 * fwd;   // (2.6: at 3.0 the box's far end was past his reach, and his far hand stopped short on its face, detached: the user)
       const pose = done ? uPoses(V1_BOSS, { view: 'q' }, tt, [[0, hold(bxu, byu)], [XF0[1] + .05, 'belly']]) : hold(bxu, byu);
       // (his fingers round the box's ends, over its face, while he holds it out; once it's on its way to her his hands are
       // behind it, letting go)
